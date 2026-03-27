@@ -91,14 +91,14 @@ int main(void)
   counts[op]++;
 
   name = opcode_name(op);
-   if (name)
-    {
-    printf("RX frame: opcode=0x%02X (%s), len=%u\n", op, name, (unsigned)len);
-    }
-   else
-    {
-    printf("RX frame: opcode=0x%02X, len=%u\n", op, (unsigned)len);
-    }
+  if (name)
+   {
+   printf("RX frame: opcode=0x%02X (%s), len=%u\n", op, name, (unsigned)len);
+   }
+  else
+   {
+   printf("RX frame: opcode=0x%02X, len=%u\n", op, (unsigned)len);
+   }
 
         /*
           Later expansion point:
@@ -124,4 +124,4 @@ done:
     }
 
     return 0;
-}
+ }
