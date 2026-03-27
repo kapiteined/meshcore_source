@@ -3,5 +3,4 @@
 
 void ptype_default(const onair_packet_t *pkt) {
     (void)pkt;
-    /* Common info is printed by ptype_dispatch(). */
 }

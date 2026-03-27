@@ -7,7 +7,6 @@ static uint32_t u32le32(const uint8_t *p) {
 }
 
 void ptype_ack(const onair_packet_t *pkt) {
-    /* ACK payload: 4-byte checksum/CRC */
     if (pkt->payload_len < 4) {
         printf("  ACK: too_short payload_len=%u (need 4)\n", (unsigned)pkt->payload_len);
         return;

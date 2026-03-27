@@ -7,7 +7,6 @@ static uint16_t u16le16(const uint8_t *p) {
 }
 
 void ptype_path(const onair_packet_t *pkt) {
-    /* PATH payload outer header: dst(1), src(1), mac(2), ciphertext(rest) */
     if (pkt->payload_len < 4) {
         printf("  PATH outer: too_short payload_len=%u (need >=4)\n", (unsigned)pkt->payload_len);
         return;

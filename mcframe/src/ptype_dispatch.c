@@ -5,6 +5,7 @@ void ptype_default(const onair_packet_t *pkt);
 void ptype_path(const onair_packet_t *pkt);
 void ptype_ack(const onair_packet_t *pkt);
 void ptype_response(const onair_packet_t *pkt);
+void ptype_grp_txt(const onair_packet_t *pkt);
 
 static void print_path_compact(const onair_packet_t *pkt) {
     if (!pkt || pkt->path_bytes == 0) return;
@@ -42,14 +43,13 @@ static void ptype_print_common(const onair_packet_t *pkt) {
 void ptype_dispatch(const onair_packet_t *pkt) {
     if (!pkt) return;
 
-    /* Print common header + path exactly once. */
     ptype_print_common(pkt);
 
-    /* Then call the payload-specific handler. */
     switch (pkt->ptype) {
         case 0x08: ptype_path(pkt); break;
         case 0x03: ptype_ack(pkt); break;
         case 0x01: ptype_response(pkt); break;
+        case 0x05: ptype_grp_txt(pkt); break;
         default:   ptype_default(pkt); break;
     }
 }

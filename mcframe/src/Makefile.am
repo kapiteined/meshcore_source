@@ -13,4 +13,5 @@ mcframe_SOURCES = \
   ptype_default.c \
   ptype_path.c \
   ptype_ack.c \
-  ptype_response.c
+  ptype_response.c \
+  ptype_grp_txt.c
