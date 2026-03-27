@@ -29,29 +29,13 @@ int onair_parse(const uint8_t *raw, size_t raw_len, onair_packet_t *out) {
     return 0;
 }
 const char* onair_route_name(uint8_t rt) {
-    switch (rt) {
-        case 0: return "TRANSPORT_FLOOD";
-        case 1: return "FLOOD";
-        case 2: return "DIRECT";
-        case 3: return "TRANSPORT_DIRECT";
-        default: return "RT_UNKNOWN";
-    }
+    switch (rt) { case 0: return "TRANSPORT_FLOOD"; case 1: return "FLOOD"; case 2: return "DIRECT"; case 3: return "TRANSPORT_DIRECT"; default: return "RT_UNKNOWN"; }
 }
 const char* onair_payload_name(uint8_t pt) {
     switch (pt) {
-        case 0x00: return "REQ";
-        case 0x01: return "RESPONSE";
-        case 0x02: return "TXT_MSG";
-        case 0x03: return "ACK";
-        case 0x04: return "ADVERT";
-        case 0x05: return "GRP_TXT";
-        case 0x06: return "GRP_DATA";
-        case 0x07: return "ANON_REQ";
-        case 0x08: return "PATH";
-        case 0x09: return "TRACE";
-        case 0x0A: return "MULTIPART";
-        case 0x0B: return "CONTROL";
-        case 0x0F: return "RAW_CUSTOM";
+        case 0x00: return "REQ"; case 0x01: return "RESPONSE"; case 0x02: return "TXT_MSG"; case 0x03: return "ACK";
+        case 0x04: return "ADVERT"; case 0x05: return "GRP_TXT"; case 0x06: return "GRP_DATA"; case 0x07: return "ANON_REQ";
+        case 0x08: return "PATH"; case 0x09: return "TRACE"; case 0x0A: return "MULTIPART"; case 0x0B: return "CONTROL"; case 0x0F: return "RAW_CUSTOM";
         default: return "PT_UNKNOWN";
     }
 }

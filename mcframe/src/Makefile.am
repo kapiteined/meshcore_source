@@ -11,9 +11,10 @@ mcframe_SOURCES = \
   onair.c onair.h \
   ptype_dispatch.c ptype_dispatch.h \
   ptype_default.c \
-  ptype_path.c \
-  ptype_ack.c \
+  ptype_req.c \
   ptype_response.c \
-  ptype_grp_txt.c \
   ptype_txt_msg.c \
-  ptype_advert.c
+  ptype_ack.c \
+  ptype_advert.c \
+  ptype_grp_txt.c \
+  ptype_path.c

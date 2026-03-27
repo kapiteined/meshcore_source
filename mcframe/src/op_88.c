@@ -12,10 +12,7 @@ void op_88(const uint8_t *frame, size_t len) {
     size_t raw_len = len - 3;
     onair_packet_t pkt;
     int rc = onair_parse(raw, raw_len, &pkt);
-    if (rc != 0) {
-        printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u (onair_parse rc=%d)\n", snr_db, rssi_dbm, (unsigned)raw_len, rc);
-        return;
-    }
+    if (rc != 0) { printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u (onair_parse rc=%d)\n", snr_db, rssi_dbm, (unsigned)raw_len, rc); return; }
     printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u\n", snr_db, rssi_dbm, (unsigned)raw_len);
     ptype_dispatch(&pkt);
 }

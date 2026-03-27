@@ -5,9 +5,7 @@
 #define SYNC_BYTE 0x3E
 #define MAX_FRAME 2048
 
-static uint16_t u16le(uint8_t lo, uint8_t hi) {
-    return (uint16_t)(lo | ((uint16_t)hi << 8));
-}
+static uint16_t u16le(uint8_t lo, uint8_t hi) { return (uint16_t)(lo | ((uint16_t)hi << 8)); }
 
 int main(void) {
     static unsigned char stdin_buf[1 << 20];

@@ -105,10 +105,10 @@ am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	op_default.$(OBJEXT) op_80.$(OBJEXT) op_83.$(OBJEXT) \
 	op_88.$(OBJEXT) op_8A.$(OBJEXT) op_0C.$(OBJEXT) \
 	onair.$(OBJEXT) ptype_dispatch.$(OBJEXT) \
-	ptype_default.$(OBJEXT) ptype_path.$(OBJEXT) \
-	ptype_ack.$(OBJEXT) ptype_response.$(OBJEXT) \
-	ptype_grp_txt.$(OBJEXT) ptype_txt_msg.$(OBJEXT) \
-	ptype_advert.$(OBJEXT)
+	ptype_default.$(OBJEXT) ptype_req.$(OBJEXT) \
+	ptype_response.$(OBJEXT) ptype_txt_msg.$(OBJEXT) \
+	ptype_ack.$(OBJEXT) ptype_advert.$(OBJEXT) \
+	ptype_grp_txt.$(OBJEXT) ptype_path.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -132,8 +132,8 @@ am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/op_default.Po ./$(DEPDIR)/ptype_ack.Po \
 	./$(DEPDIR)/ptype_advert.Po ./$(DEPDIR)/ptype_default.Po \
 	./$(DEPDIR)/ptype_dispatch.Po ./$(DEPDIR)/ptype_grp_txt.Po \
-	./$(DEPDIR)/ptype_path.Po ./$(DEPDIR)/ptype_response.Po \
-	./$(DEPDIR)/ptype_txt_msg.Po
+	./$(DEPDIR)/ptype_path.Po ./$(DEPDIR)/ptype_req.Po \
+	./$(DEPDIR)/ptype_response.Po ./$(DEPDIR)/ptype_txt_msg.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -275,12 +275,13 @@ mcframe_SOURCES = \
   onair.c onair.h \
   ptype_dispatch.c ptype_dispatch.h \
   ptype_default.c \
-  ptype_path.c \
-  ptype_ack.c \
+  ptype_req.c \
   ptype_response.c \
-  ptype_grp_txt.c \
   ptype_txt_msg.c \
-  ptype_advert.c
+  ptype_ack.c \
+  ptype_advert.c \
+  ptype_grp_txt.c \
+  ptype_path.c
 
 all: all-am
 
@@ -383,6 +384,7 @@ include ./$(DEPDIR)/ptype_default.Po # am--include-marker
 include ./$(DEPDIR)/ptype_dispatch.Po # am--include-marker
 include ./$(DEPDIR)/ptype_grp_txt.Po # am--include-marker
 include ./$(DEPDIR)/ptype_path.Po # am--include-marker
+include ./$(DEPDIR)/ptype_req.Po # am--include-marker
 include ./$(DEPDIR)/ptype_response.Po # am--include-marker
 include ./$(DEPDIR)/ptype_txt_msg.Po # am--include-marker
 
@@ -550,6 +552,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po
 	-rm -f ./$(DEPDIR)/ptype_path.Po
+	-rm -f ./$(DEPDIR)/ptype_req.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
 	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
 	-rm -f Makefile
@@ -612,6 +615,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po
 	-rm -f ./$(DEPDIR)/ptype_path.Po
+	-rm -f ./$(DEPDIR)/ptype_req.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
 	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
 	-rm -f Makefile
