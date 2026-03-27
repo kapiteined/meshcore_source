@@ -15,4 +15,5 @@ mcframe_SOURCES = \
   ptype_ack.c \
   ptype_response.c \
   ptype_grp_txt.c \
-  ptype_txt_msg.c
+  ptype_txt_msg.c \
+  ptype_advert.c

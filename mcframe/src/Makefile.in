@@ -107,7 +107,8 @@ am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	onair.$(OBJEXT) ptype_dispatch.$(OBJEXT) \
 	ptype_default.$(OBJEXT) ptype_path.$(OBJEXT) \
 	ptype_ack.$(OBJEXT) ptype_response.$(OBJEXT) \
-	ptype_grp_txt.$(OBJEXT) ptype_txt_msg.$(OBJEXT)
+	ptype_grp_txt.$(OBJEXT) ptype_txt_msg.$(OBJEXT) \
+	ptype_advert.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -129,9 +130,10 @@ am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/onair.Po ./$(DEPDIR)/op_0C.Po ./$(DEPDIR)/op_80.Po \
 	./$(DEPDIR)/op_83.Po ./$(DEPDIR)/op_88.Po ./$(DEPDIR)/op_8A.Po \
 	./$(DEPDIR)/op_default.Po ./$(DEPDIR)/ptype_ack.Po \
-	./$(DEPDIR)/ptype_default.Po ./$(DEPDIR)/ptype_dispatch.Po \
-	./$(DEPDIR)/ptype_grp_txt.Po ./$(DEPDIR)/ptype_path.Po \
-	./$(DEPDIR)/ptype_response.Po ./$(DEPDIR)/ptype_txt_msg.Po
+	./$(DEPDIR)/ptype_advert.Po ./$(DEPDIR)/ptype_default.Po \
+	./$(DEPDIR)/ptype_dispatch.Po ./$(DEPDIR)/ptype_grp_txt.Po \
+	./$(DEPDIR)/ptype_path.Po ./$(DEPDIR)/ptype_response.Po \
+	./$(DEPDIR)/ptype_txt_msg.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -277,7 +279,8 @@ mcframe_SOURCES = \
   ptype_ack.c \
   ptype_response.c \
   ptype_grp_txt.c \
-  ptype_txt_msg.c
+  ptype_txt_msg.c \
+  ptype_advert.c
 
 all: all-am
 
@@ -375,6 +378,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/op_8A.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/op_default.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_ack.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_advert.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_default.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_dispatch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_grp_txt.Po@am__quote@ # am--include-marker
@@ -541,6 +545,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/op_8A.Po
 	-rm -f ./$(DEPDIR)/op_default.Po
 	-rm -f ./$(DEPDIR)/ptype_ack.Po
+	-rm -f ./$(DEPDIR)/ptype_advert.Po
 	-rm -f ./$(DEPDIR)/ptype_default.Po
 	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po
@@ -602,6 +607,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/op_8A.Po
 	-rm -f ./$(DEPDIR)/op_default.Po
 	-rm -f ./$(DEPDIR)/ptype_ack.Po
+	-rm -f ./$(DEPDIR)/ptype_advert.Po
 	-rm -f ./$(DEPDIR)/ptype_default.Po
 	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po

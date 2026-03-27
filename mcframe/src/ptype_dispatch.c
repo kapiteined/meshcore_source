@@ -7,6 +7,7 @@ void ptype_ack(const onair_packet_t *pkt);
 void ptype_response(const onair_packet_t *pkt);
 void ptype_grp_txt(const onair_packet_t *pkt);
 void ptype_txt_msg(const onair_packet_t *pkt);
+void ptype_advert(const onair_packet_t *pkt);
 
 static void print_path_compact(const onair_packet_t *pkt) {
     if (!pkt || pkt->path_bytes == 0) return;
@@ -52,6 +53,7 @@ void ptype_dispatch(const onair_packet_t *pkt) {
         case 0x01: ptype_response(pkt); break;
         case 0x05: ptype_grp_txt(pkt); break;
         case 0x02: ptype_txt_msg(pkt); break;
+        case 0x04: ptype_advert(pkt); break;
         default:   ptype_default(pkt); break;
     }
 }

@@ -24,7 +24,6 @@ typedef struct {
 } onair_packet_t;
 
 int onair_parse(const uint8_t *raw, size_t raw_len, onair_packet_t *out);
-
 const char* onair_route_name(uint8_t rt);
 const char* onair_payload_name(uint8_t pt);
 

@@ -1,36 +1,28 @@
 # Doxygen configuration for meshcore_source (HTML only)
-
 PROJECT_NAME           = "meshcore_source"
 PROJECT_BRIEF          = "mcframe decoder"
 OUTPUT_DIRECTORY       = docs/doxygen
-
 INPUT                  = mcframe/src
 RECURSIVE              = YES
 FILE_PATTERNS          = *.c *.h
-
 EXTRACT_ALL            = YES
 EXTRACT_STATIC         = YES
 EXTRACT_PRIVATE        = YES
 EXTRACT_LOCAL_CLASSES  = YES
-
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 GENERATE_LATEX         = NO
-
 HAVE_DOT               = YES
 CALL_GRAPH             = YES
 CALLER_GRAPH           = YES
 DOT_IMAGE_FORMAT       = svg
-
 SOURCE_BROWSER         = YES
 INLINE_SOURCES         = NO
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
-
 GENERATE_MAN           = NO
 GENERATE_RTF           = NO
 GENERATE_XML           = NO
-
 WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = NO
 QUIET                  = NO

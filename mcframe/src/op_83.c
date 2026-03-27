@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
-
 void op_83(const uint8_t *frame, size_t len) {
     (void)frame;
     if (len != 1) {

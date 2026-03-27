@@ -10,7 +10,7 @@ static uint16_t u16le(uint8_t lo, uint8_t hi) {
 }
 
 int main(void) {
-    static unsigned char stdin_buf[1 << 20]; /* 1 MiB */
+    static unsigned char stdin_buf[1 << 20];
     setvbuf(stdin, (char*)stdin_buf, _IOFBF, sizeof(stdin_buf));
 
     uint8_t buf[MAX_FRAME];
