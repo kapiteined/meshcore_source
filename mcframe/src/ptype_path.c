@@ -2,18 +2,6 @@
 #include <stdint.h>
 #include "ptype_dispatch.h"
 
-/*
-  PAYLOAD_TYPE_PATH (0x08) outer payload header (per MeshCore docs):
-    destination_hash  1
-    source_hash       1
-    cipher_mac         2 (little-endian)
-    ciphertext        rest
-
-  We only decode the outer header (no decryption).
-
-  NOTE: The on-air packet's separate 'path' field (pkt->path) is still useful and is printed.
-*/
-
 static uint16_t u16le(const uint8_t *p) {
     return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
 }
@@ -37,7 +25,6 @@ void ptype_path(const onair_packet_t *pkt) {
 
     printf(" path_len=%u payload_len=%u\n", (unsigned)pkt->path_len, (unsigned)pkt->payload_len);
 
-    /* Restore printing of the on-air path field */
     if (pkt->path_len) {
         printf("  path: ");
         print_path_compact(pkt->path, pkt->path_len);
@@ -57,6 +44,4 @@ void ptype_path(const onair_packet_t *pkt) {
 
     printf("  PATH outer: dst_hash=0x%02X src_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
            (unsigned)dst, (unsigned)src, (unsigned)mac, cipher_len);
-
-    /* No ciphertext dump for now. */
 }

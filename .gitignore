@@ -1,0 +1,46 @@
+# --- Autotools / Automake ---
+/autom4te.cache/
+/aclocal.m4
+/compile
+/config.guess
+/config.sub
+/config.h
+/config.h.in
+/config.log
+/config.status
+/configure
+/depcomp
+/install-sh
+/ltmain.sh
+/m4/
+/missing
+/stamp-h1
+
+# Generated Makefiles
+/Makefile
+/Makefile.in
+/mcframe/Makefile
+/mcframe/Makefile.in
+/mcframe/src/Makefile
+/mcframe/src/Makefile.in
+
+# Objects / binaries
+*.o
+*.a
+*.la
+*.lo
+/mcframe/src/mcframe
+
+# Captures / logs
+*.bin
+*.b64
+*.log
+capture.*
+usb_stream.*
+
+# Editor / OS junk
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
