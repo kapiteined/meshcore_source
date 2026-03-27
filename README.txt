@@ -12,4 +12,8 @@ Run (stdin):
 
 Structure:
   - One file per companion opcode: op_XX.c
-  - op_88.c parses embedded on-air packet and forwards to per-ptype decoder (separate files).
+  - op_88.c parses embedded on-air packet and forwards to per-ptype decoder.
+  - ptype-specific decoders are in ptype_*.c and only added when we decode them.
+
+Currently implemented ptype decoders:
+  - ptype_path.c (PAYLOAD_TYPE_PATH / 0x08): decodes outer header (dest_hash, src_hash, cipher_mac, ciphertext_len)

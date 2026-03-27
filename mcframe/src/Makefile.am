@@ -8,4 +8,5 @@ mcframe_SOURCES = \
   op_8A.c \
   onair.c onair.h \
   ptype_dispatch.c ptype_dispatch.h \
-  ptype_default.c
+  ptype_default.c \
+  ptype_path.c

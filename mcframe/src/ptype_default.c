@@ -9,10 +9,6 @@ static void print_path_compact(const uint8_t *path, unsigned n) {
 }
 
 void ptype_default(const onair_packet_t *pkt) {
-    /* "Decode further" at the structural level: header fields already known.
-       We print ptype name, transport codes (if any), path and payload length.
-       Payload bytes themselves remain undisplayed for now. */
-
     printf("  ptype: %s(0x%X) ver=%u route=%s(0x%X)",
            onair_payload_name(pkt->ptype), (unsigned)pkt->ptype,
            (unsigned)pkt->ver,

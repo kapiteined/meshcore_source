@@ -8,7 +8,6 @@
 static int8_t i8(uint8_t b) { return (int8_t)b; }
 
 void op_88(const uint8_t *frame, size_t len) {
-    /* PUSH_LOG_RX_DATA (0x88): [0x88][snr_x4:int8][rssi_dbm:int8][raw_on_air_packet...] */
     if (len < 4) {
         printf("PUSH_LOG_RX_DATA (0x88): too_short len=%u\n", (unsigned)len);
         return;
@@ -31,6 +30,5 @@ void op_88(const uint8_t *frame, size_t len) {
     printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u\n",
            snr_db, rssi_dbm, (unsigned)raw_len);
 
-    /* Delegate further decoding based on ptype to separate file(s). */
     ptype_dispatch(&pkt);
 }
