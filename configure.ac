@@ -1,4 +1,4 @@
-AC_INIT([myproject],[0.1.0],[you@example.invalid])
+AC_INIT([meshcore_source],[0.1.0],[you@example.invalid])
 AM_INIT_AUTOMAKE([foreign -Wall subdir-objects])
 AC_CONFIG_SRCDIR([mcframe/src/main.c])
 AC_CONFIG_HEADERS([config.h])
