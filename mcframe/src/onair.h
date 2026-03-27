@@ -12,7 +12,12 @@ typedef struct {
     int has_transport;
     uint16_t tc1;
     uint16_t tc2;
-    uint8_t path_len;
+
+    uint8_t path_len_raw;
+    uint8_t hash_size;
+    uint8_t hop_count;
+    uint8_t path_bytes;
+
     const uint8_t *path;
     const uint8_t *payload;
     size_t payload_len;

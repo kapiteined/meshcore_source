@@ -2,10 +2,6 @@
 #include <stdint.h>
 #include "ptype_dispatch.h"
 
-static uint16_t u16le(const uint8_t *p) {
-    return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
-}
-
 static void print_path_compact(const onair_packet_t *pkt) {
     if (!pkt || pkt->path_bytes == 0) return;
 
@@ -19,7 +15,11 @@ static void print_path_compact(const onair_packet_t *pkt) {
 }
 
 
-void ptype_path(const onair_packet_t *pkt) {
+static uint32_t u32le(const uint8_t *p) {
+    return (uint32_t)(p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24));
+}
+
+void ptype_ack(const onair_packet_t *pkt) {
     printf("  ptype: %s(0x%X) ver=%u route=%s(0x%X)",
            onair_payload_name(pkt->ptype), (unsigned)pkt->ptype,
            (unsigned)pkt->ver,
@@ -42,17 +42,12 @@ void ptype_path(const onair_packet_t *pkt) {
         printf("\n");
     }
 
+    /* ACK payload is a 4-byte checksum (CRC) of message timestamp, text, and sender pubkey. */
     if (pkt->payload_len < 4) {
-        printf("  PATH outer: too_short payload_len=%u (need >=4)\n", (unsigned)pkt->payload_len);
+        printf("  ACK: too_short payload_len=%u (need 4)\n", (unsigned)pkt->payload_len);
         return;
     }
 
-    const uint8_t *p = pkt->payload;
-    uint8_t dst = p[0];
-    uint8_t src = p[1];
-    uint16_t mac = u16le(&p[2]);
-    unsigned cipher_len = (unsigned)pkt->payload_len - 4;
-
-    printf("  PATH outer: dst_hash=0x%02X src_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
-           (unsigned)dst, (unsigned)src, (unsigned)mac, cipher_len);
+    uint32_t crc = u32le(pkt->payload);
+    printf("  ACK: checksum=0x%08lX\n", (unsigned long)crc);
 }

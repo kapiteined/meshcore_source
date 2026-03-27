@@ -26,12 +26,17 @@ int onair_parse(const uint8_t *raw, size_t raw_len, onair_packet_t *out) {
     }
 
     if (raw_len < i + 1) return -3;
-    out->path_len = raw[i++];
-    if (out->path_len > 64) return -4;
-    if (raw_len < i + out->path_len) return -5;
+
+    out->path_len_raw = raw[i++];
+    out->hash_size = (uint8_t)(((out->path_len_raw >> 6) & 0x03) + 1);
+    out->hop_count = (uint8_t)(out->path_len_raw & 0x3F);
+    out->path_bytes = (uint8_t)(out->hash_size * out->hop_count);
+
+    if (out->path_bytes > 64) return -4;
+    if (raw_len < i + out->path_bytes) return -5;
 
     out->path = &raw[i];
-    i += out->path_len;
+    i += out->path_bytes;
 
     out->payload = &raw[i];
     out->payload_len = raw_len - i;

@@ -2,12 +2,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/*
-  RESP_BATT_AND_STORAGE (0x0C) (per MeshCore companion protocol):
-    [0x0C][battery_mv u16le][used_kb u32le][total_kb u32le]
-  Total length = 1 + 2 + 4 + 4 = 11 bytes.
-*/
-
 static uint16_t u16le(const uint8_t *p) {
     return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
 }
