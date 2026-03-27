@@ -107,7 +107,7 @@ am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	onair.$(OBJEXT) ptype_dispatch.$(OBJEXT) \
 	ptype_default.$(OBJEXT) ptype_path.$(OBJEXT) \
 	ptype_ack.$(OBJEXT) ptype_response.$(OBJEXT) \
-	ptype_grp_txt.$(OBJEXT)
+	ptype_grp_txt.$(OBJEXT) ptype_txt_msg.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -131,7 +131,7 @@ am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/op_default.Po ./$(DEPDIR)/ptype_ack.Po \
 	./$(DEPDIR)/ptype_default.Po ./$(DEPDIR)/ptype_dispatch.Po \
 	./$(DEPDIR)/ptype_grp_txt.Po ./$(DEPDIR)/ptype_path.Po \
-	./$(DEPDIR)/ptype_response.Po
+	./$(DEPDIR)/ptype_response.Po ./$(DEPDIR)/ptype_txt_msg.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -276,7 +276,8 @@ mcframe_SOURCES = \
   ptype_path.c \
   ptype_ack.c \
   ptype_response.c \
-  ptype_grp_txt.c
+  ptype_grp_txt.c \
+  ptype_txt_msg.c
 
 all: all-am
 
@@ -379,6 +380,7 @@ include ./$(DEPDIR)/ptype_dispatch.Po # am--include-marker
 include ./$(DEPDIR)/ptype_grp_txt.Po # am--include-marker
 include ./$(DEPDIR)/ptype_path.Po # am--include-marker
 include ./$(DEPDIR)/ptype_response.Po # am--include-marker
+include ./$(DEPDIR)/ptype_txt_msg.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -544,6 +546,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po
 	-rm -f ./$(DEPDIR)/ptype_path.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
+	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -604,6 +607,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ptype_grp_txt.Po
 	-rm -f ./$(DEPDIR)/ptype_path.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
+	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
