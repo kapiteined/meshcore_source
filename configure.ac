@@ -1,6 +1,6 @@
-AC_INIT([mcframe],[0.1.0],[you@example.invalid])
+AC_INIT([myproject],[0.1.0],[you@example.invalid])
 AM_INIT_AUTOMAKE([foreign -Wall subdir-objects])
-AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_SRCDIR([mcframe/src/main.c])
 AC_CONFIG_HEADERS([config.h])
 
 AC_PROG_CC
@@ -19,6 +19,7 @@ CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
 
 AC_CONFIG_FILES([
   Makefile
-  src/Makefile
+  mcframe/Makefile
+  mcframe/src/Makefile
 ])
 AC_OUTPUT
