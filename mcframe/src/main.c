@@ -70,35 +70,35 @@ int main(void)
    {
    c = fgetc(stdin);
    if (c == EOF) goto done;
+   }
       
-   lo = fgetc(stdin);
-   hi = fgetc(stdin);
-   if (lo == EOF || hi == EOF) break;
+  lo = fgetc(stdin);
+  hi = fgetc(stdin);
+  if (lo == EOF || hi == EOF) break;
 
-   len = 0;
-   len = hi << 8 | lo;
-   if (len == 0 || len > MAX_FRAME)
-    {
-    /* Invalid length → resync */
-    continue;
-    }
+  len = 0;
+  len = hi << 8 | lo;
+  if (len == 0 || len > MAX_FRAME)
+   {
+   /* Invalid length → resync */
+   continue;
    }
 
-   got = fread(buf, 1, len, stdin);
-   if (got != len) break;
+  got = fread(buf, 1, len, stdin);
+  if (got != len) break;
 
-   op = buf[0];
-   counts[op]++;
+  op = buf[0];
+  counts[op]++;
 
-   name = opcode_name(op);
-    if (name)
-     {
-     printf("RX frame: opcode=0x%02X (%s), len=%u\n", op, name, (unsigned)len);
-     }
-    else
-     {
-     printf("RX frame: opcode=0x%02X, len=%u\n", op, (unsigned)len);
-     }
+  name = opcode_name(op);
+   if (name)
+    {
+    printf("RX frame: opcode=0x%02X (%s), len=%u\n", op, name, (unsigned)len);
+    }
+   else
+    {
+    printf("RX frame: opcode=0x%02X, len=%u\n", op, (unsigned)len);
+    }
 
         /*
           Later expansion point:
@@ -109,7 +109,7 @@ int main(void)
             default: break;
           }
         */
-    }
+  }
 
 done:
     printf("\n=== Summary (opcode counts) ===\n");
