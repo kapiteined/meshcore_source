@@ -38,6 +38,11 @@
 capture.*
 usb_stream.*
 
+# Doxygen output (generated)
+/docs/doxygen/html/
+/docs/doxygen/latex/
+/docs/doxygen/xml/
+
 # Editor / OS junk
 *~
 *.swp

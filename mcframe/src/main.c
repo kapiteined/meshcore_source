@@ -27,9 +27,7 @@ int main(void) {
         if (lo == EOF || hi == EOF) return 0;
 
         uint16_t len = u16le((uint8_t)lo, (uint8_t)hi);
-        if (len == 0 || len > MAX_FRAME) {
-            continue; /* resync */
-        }
+        if (len == 0 || len > MAX_FRAME) continue;
 
         size_t got = fread(buf, 1, len, stdin);
         if (got != len) return 0;

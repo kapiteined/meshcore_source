@@ -6,7 +6,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CC
 AC_PROG_INSTALL
 
-# Prefer C99 if supported
 AC_MSG_CHECKING([for -std=c99])
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -std=c99"

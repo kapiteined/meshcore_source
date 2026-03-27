@@ -12,4 +12,5 @@ mcframe_SOURCES = \
   ptype_dispatch.c ptype_dispatch.h \
   ptype_default.c \
   ptype_path.c \
-  ptype_ack.c
+  ptype_ack.c \
+  ptype_response.c
