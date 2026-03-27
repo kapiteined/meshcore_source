@@ -2,20 +2,35 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "onair.h"
+#include "ptype_dispatch.h"
+
 static int8_t i8(uint8_t b) { return (int8_t)b; }
 
 void op_88(const uint8_t *frame, size_t len) {
-    /* PUSH_LOG_RX_DATA (0x88): [0x88][snr*4][rssi][raw...] */
-    if (len < 3) {
+    /* PUSH_LOG_RX_DATA (0x88): [0x88][snr_x4:int8][rssi_dbm:int8][raw_on_air_packet...] */
+    if (len < 4) {
         printf("PUSH_LOG_RX_DATA (0x88): too_short len=%u\n", (unsigned)len);
         return;
     }
 
     double snr_db = (double)i8(frame[1]) / 4.0;
     int rssi_dbm = (int)i8(frame[2]);
+
+    const uint8_t *raw = frame + 3;
     size_t raw_len = len - 3;
 
-    /* Keep it minimal for now: just header info */
-    printf("PUSH_LOG_RX_DATA (0x88): len=%u snr=%.2f dB rssi=%d dBm raw_len=%u\n",
-           (unsigned)len, snr_db, rssi_dbm, (unsigned)raw_len);
+    onair_packet_t pkt;
+    int rc = onair_parse(raw, raw_len, &pkt);
+    if (rc != 0) {
+        printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u (onair_parse rc=%d)\n",
+               snr_db, rssi_dbm, (unsigned)raw_len, rc);
+        return;
+    }
+
+    printf("PUSH_LOG_RX_DATA (0x88): snr=%.2f dB rssi=%d dBm raw_len=%u\n",
+           snr_db, rssi_dbm, (unsigned)raw_len);
+
+    /* Delegate further decoding based on ptype to separate file(s). */
+    ptype_dispatch(&pkt);
 }

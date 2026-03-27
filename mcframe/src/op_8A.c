@@ -22,7 +22,6 @@ static void print_path_compact(const uint8_t *path, unsigned n) {
 }
 
 void op_8A(const uint8_t *frame, size_t len) {
-    /* PUSH_NEW_ADVERT (0x8A) is typically a 148-byte ContactInfo struct. */
     if (len < 148) {
         printf("PUSH_NEW_ADVERT (0x8A): too_short len=%u\n", (unsigned)len);
         return;
@@ -37,9 +36,6 @@ void op_8A(const uint8_t *frame, size_t len) {
     char name[33];
     memcpy(name, &frame[100], 32);
     name[32] = '\0';
-    for (int i = 0; i < 32; i++) {
-        if (name[i] == '\0') break;
-    }
 
     uint32_t last_adv_ts = u32le(&frame[132]);
     int32_t lat_i = i32le(&frame[136]);

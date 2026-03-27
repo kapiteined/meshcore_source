@@ -103,7 +103,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	op_default.$(OBJEXT) op_80.$(OBJEXT) op_88.$(OBJEXT) \
-	op_8A.$(OBJEXT)
+	op_8A.$(OBJEXT) onair.$(OBJEXT) ptype_dispatch.$(OBJEXT) \
+	ptype_default.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -122,8 +123,9 @@ DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
-	./$(DEPDIR)/op_80.Po ./$(DEPDIR)/op_88.Po ./$(DEPDIR)/op_8A.Po \
-	./$(DEPDIR)/op_default.Po
+	./$(DEPDIR)/onair.Po ./$(DEPDIR)/op_80.Po ./$(DEPDIR)/op_88.Po \
+	./$(DEPDIR)/op_8A.Po ./$(DEPDIR)/op_default.Po \
+	./$(DEPDIR)/ptype_default.Po ./$(DEPDIR)/ptype_dispatch.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -259,7 +261,10 @@ mcframe_SOURCES = \
   op_default.c \
   op_80.c \
   op_88.c \
-  op_8A.c
+  op_8A.c \
+  onair.c onair.h \
+  ptype_dispatch.c ptype_dispatch.h \
+  ptype_default.c
 
 all: all-am
 
@@ -349,10 +354,13 @@ distclean-compile:
 
 include ./$(DEPDIR)/dispatch.Po # am--include-marker
 include ./$(DEPDIR)/main.Po # am--include-marker
+include ./$(DEPDIR)/onair.Po # am--include-marker
 include ./$(DEPDIR)/op_80.Po # am--include-marker
 include ./$(DEPDIR)/op_88.Po # am--include-marker
 include ./$(DEPDIR)/op_8A.Po # am--include-marker
 include ./$(DEPDIR)/op_default.Po # am--include-marker
+include ./$(DEPDIR)/ptype_default.Po # am--include-marker
+include ./$(DEPDIR)/ptype_dispatch.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -505,10 +513,13 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/dispatch.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/onair.Po
 	-rm -f ./$(DEPDIR)/op_80.Po
 	-rm -f ./$(DEPDIR)/op_88.Po
 	-rm -f ./$(DEPDIR)/op_8A.Po
 	-rm -f ./$(DEPDIR)/op_default.Po
+	-rm -f ./$(DEPDIR)/ptype_default.Po
+	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -556,10 +567,13 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/dispatch.Po
 	-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/onair.Po
 	-rm -f ./$(DEPDIR)/op_80.Po
 	-rm -f ./$(DEPDIR)/op_88.Po
 	-rm -f ./$(DEPDIR)/op_8A.Po
 	-rm -f ./$(DEPDIR)/op_default.Po
+	-rm -f ./$(DEPDIR)/ptype_default.Po
+	-rm -f ./$(DEPDIR)/ptype_dispatch.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

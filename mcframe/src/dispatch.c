@@ -1,6 +1,5 @@
 #include "dispatch.h"
 
-/* One file per opcode. */
 void op_80(const uint8_t *frame, size_t len);
 void op_88(const uint8_t *frame, size_t len);
 void op_8A(const uint8_t *frame, size_t len);

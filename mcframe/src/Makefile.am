@@ -5,4 +5,7 @@ mcframe_SOURCES = \
   op_default.c \
   op_80.c \
   op_88.c \
-  op_8A.c
+  op_8A.c \
+  onair.c onair.h \
+  ptype_dispatch.c ptype_dispatch.h \
+  ptype_default.c

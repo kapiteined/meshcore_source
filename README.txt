@@ -10,5 +10,6 @@ Run (stdin):
   cat /dev/ttyACM0 | tee capture.bin | ./mcframe/src/mcframe
   cat capture.bin | ./mcframe/src/mcframe
 
-This version prints one line per frame by default (op_default).
-Per-opcode handlers live in separate files (one file per opcode).
+Structure:
+  - One file per companion opcode: op_XX.c
+  - op_88.c parses embedded on-air packet and forwards to per-ptype decoder (separate files).
