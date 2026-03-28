@@ -11,7 +11,7 @@
 #include "util_channels.h"
 
 /* Enable external tool invocation by defining MCFRAME_EXT_TOOL_PATH at compile time, e.g.
- *   CFLAGS='-DMCFRAME_EXT_TOOL_PATH="/tmp/myprog"' ./configure && make
+ *   CFLAGS='-DMCFRAME_EXT_TOOL_PATH=\"/tmp/myprog\"' ./configure && make
  */
 
 static uint16_t u16le16(const uint8_t *p)
@@ -27,25 +27,32 @@ static void hex_to_cstr(const uint8_t *buf, size_t len, char *out)
         out[2*i + 0] = hexd[(buf[i] >> 4) & 0x0F];
         out[2*i + 1] = hexd[buf[i] & 0x0F];
     }
-    out[2*len] = 0;
+    out[2*len] = '\0';
 }
 
-static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
+/*
+ * Run external tool as: <prog> <label> <mac+ciphertext-hex>
+ * Returns:
+ *   -1  tool not run (unknown label)
+ *   >=0 exit code of the tool
+ * Prints captured tool output (stdout+stderr) as a single block.
+ */
+static int run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
 {
     if (!label || !mac_ct || mac_ct_len == 0) {
-        return;
+        return -1;
     }
 
     /* Only run the tool when label is known */
     if (strcmp(label, "onbekend") == 0) {
-        return;
+        return -1;
     }
 
     /* Convert mac+ciphertext to a hex C-string for argv */
     size_t hex_len = mac_ct_len * 2;
     char *hex = (char *)malloc(hex_len + 1);
     if (!hex) {
-        return;
+        return 127;
     }
     hex_to_cstr(mac_ct, mac_ct_len, hex);
 
@@ -53,7 +60,7 @@ static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, si
     int pipefd[2];
     if (pipe(pipefd) != 0) {
         free(hex);
-        return;
+        return 127;
     }
 
     pid_t pid = fork();
@@ -70,6 +77,9 @@ static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, si
 
     /* parent */
     (void)close(pipefd[1]);
+
+    int rc = 127;
+    int status = 0;
 
     if (pid > 0) {
         /* Read all output from tool and print it as a single block */
@@ -92,20 +102,27 @@ static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, si
             out = tmp;
             memcpy(out + used, buf, (size_t)n);
             used += (size_t)n;
-            out[used] = 0;
+            out[used] = '\0';
         }
 
         (void)close(pipefd[0]);
-        (void)waitpid(pid, NULL, 0);
+        (void)waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status)) {
+            rc = WEXITSTATUS(status);
+        } else {
+            rc = 127;
+        }
 
         if (out && used > 0) {
-            /* Ensure our own output is flushed before printing the tool output */
             fflush(stdout);
-            /* Prefix one line so it stays readable */
-            printf("  EXTTOOL (%s): %s", label, out);
-            /* If tool didn't end with newline, add one */
-            if (used > 0 && out[used-1] != ' ') {
-                printf(" ");
+            if (rc == 0) {
+                printf("  EXTTOOL (%s): %s", label, out);
+            } else {
+                printf("  EXTTOOL (%s) rc=%d: %s", label, rc, out);
+            }
+            if (out[used-1] != '\n') {
+                printf("\n");
             }
         }
 
@@ -115,20 +132,23 @@ static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, si
     }
 
     free(hex);
+    return rc;
 }
 #else
-static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
+static int run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
 {
     (void)label;
     (void)mac_ct;
     (void)mac_ct_len;
+    return -1;
 }
 #endif
 
 void ptype_grp_txt(const onair_packet_t *pkt)
 {
     if (pkt->payload_len < 3) {
-        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3) ", (unsigned)pkt->payload_len);
+        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3)\n",
+               (unsigned)pkt->payload_len);
         return;
     }
 
@@ -140,18 +160,24 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     unsigned ct_len = (unsigned)pkt->payload_len - 3;
     const uint8_t *ct = &p[3];
 
-    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u ", (unsigned)chan_hash, (unsigned)mac, ct_len);
-
     /* raw bytes WITHOUT chan_hash, but label lookup uses chan_hash */
     const char *label = util_chan_hash_label(chan_hash);
     const uint8_t *mac_ct = &p[1];
     size_t mac_ct_len = (size_t)pkt->payload_len - 1;
 
+    /* Run tool first; if it succeeds (rc==0), skip our duplicate prints */
+    int rc = run_external_tool(label, mac_ct, mac_ct_len);
+    if (rc == 0) {
+        return;
+    }
+
+    /* Fallback prints (only when tool not run or rc != 0) */
+    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
+           (unsigned)chan_hash, (unsigned)mac, ct_len);
+
     printf("  GRP_TXT raw (mac+ciphertext) (label=%s): ", label);
     util_hex_dump(mac_ct, mac_ct_len);
-    printf(" ");
-
-    maybe_run_external_tool(label, mac_ct, mac_ct_len);
+    printf("\n");
 
     util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);
 }

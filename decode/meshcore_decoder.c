@@ -341,7 +341,7 @@ int meshcore_decode_grp_txt(const char *secret_hex, const char *mac_data_hex,
         fprintf(stderr,"202603281553 Warning: MAC mismatch (expected 0x%04X, got 0x%04X) -- wrong channel secret?\n",
                 mac_expected, mac_computed);
     } else {
-        fprintf(stderr,"202603281554 MAC OK (0x%04X)\n", mac_expected);
+        fprintf(stderr,"MAC OK (0x%04X)\n", mac_expected);
     }
 
     /* Decrypt AES-128-ECB */
