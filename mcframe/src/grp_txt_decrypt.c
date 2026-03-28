@@ -1,0 +1,396 @@
+#include <stdio.h>
+#include <string.h>
+#include "grp_txt_decrypt.h"
+
+/* Minimal crypto (SHA-256/HMAC + AES-128-ECB decrypt) taken from the standalone decoder. */
+typedef unsigned char u8;
+typedef unsigned int u32;
+
+/* =========================================================================
+ * SHA-256
+ * ========================================================================= */
+#define RR32(x,n) (((x)>>(n))|((x)<<(32-(n))))
+#define SH_CH(x,y,z) (((x)&(y))^(~(x)&(z)))
+#define SH_MAJ(x,y,z) (((x)&(y))^((x)&(z))^((y)&(z)))
+#define SH_S0(x) (RR32(x,2)^RR32(x,13)^RR32(x,22))
+#define SH_S1(x) (RR32(x,6)^RR32(x,11)^RR32(x,25))
+#define SH_G0(x) (RR32(x,7)^RR32(x,18)^((x)>>3))
+#define SH_G1(x) (RR32(x,17)^RR32(x,19)^((x)>>10))
+
+static const u32 K256[64] = {
+ 0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,
+ 0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+ 0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,
+ 0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+ 0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,
+ 0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+ 0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,
+ 0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+ 0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,
+ 0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+ 0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,
+ 0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+ 0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,
+ 0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+ 0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,
+ 0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+};
+
+typedef struct { u8 buf[64]; u32 len; unsigned long long bits; u32 h[8]; } SHA256;
+
+static void sha256_compress(SHA256 *c, const u8 *b)
+{
+    u32 w[64], a, bb, cc, d, e, f, g, h;
+    u32 t1, t2;
+    int i;
+
+    for (i = 0; i < 16; i++) {
+        w[i] = ((u32)b[i*4] << 24) | ((u32)b[i*4+1] << 16) | ((u32)b[i*4+2] << 8) | (u32)b[i*4+3];
+    }
+    for (i = 16; i < 64; i++) {
+        w[i] = SH_G1(w[i-2]) + w[i-7] + SH_G0(w[i-15]) + w[i-16];
+    }
+
+    a = c->h[0]; bb = c->h[1]; cc = c->h[2]; d = c->h[3];
+    e = c->h[4]; f = c->h[5]; g = c->h[6]; h = c->h[7];
+
+    for (i = 0; i < 64; i++) {
+        t1 = h + SH_S1(e) + SH_CH(e,f,g) + K256[i] + w[i];
+        t2 = SH_S0(a) + SH_MAJ(a,bb,cc);
+        h = g; g = f; f = e; e = d + t1;
+        d = cc; cc = bb; bb = a; a = t1 + t2;
+    }
+
+    c->h[0] += a; c->h[1] += bb; c->h[2] += cc; c->h[3] += d;
+    c->h[4] += e; c->h[5] += f; c->h[6] += g; c->h[7] += h;
+}
+
+static void sha256_init(SHA256 *c)
+{
+    c->len = 0;
+    c->bits = 0;
+    c->h[0] = 0x6a09e667; c->h[1] = 0xbb67ae85; c->h[2] = 0x3c6ef372; c->h[3] = 0xa54ff53a;
+    c->h[4] = 0x510e527f; c->h[5] = 0x9b05688c; c->h[6] = 0x1f83d9ab; c->h[7] = 0x5be0cd19;
+}
+
+static void sha256_feed(SHA256 *c, const u8 *data, size_t n)
+{
+    size_t i;
+    for (i = 0; i < n; i++) {
+        c->buf[c->len++] = data[i];
+        if (c->len == 64) {
+            sha256_compress(c, c->buf);
+            c->bits += 512;
+            c->len = 0;
+        }
+    }
+}
+
+static void sha256_done(SHA256 *c, u8 out[32])
+{
+    int i;
+    c->bits += (unsigned long long)c->len * 8ULL;
+    c->buf[c->len++] = 0x80;
+    if (c->len > 56) {
+        while (c->len < 64) c->buf[c->len++] = 0;
+        sha256_compress(c, c->buf);
+        c->len = 0;
+    }
+    while (c->len < 56) c->buf[c->len++] = 0;
+    for (i = 7; i >= 0; i--) {
+        c->buf[56 + (7 - i)] = (u8)(c->bits >> (i * 8));
+    }
+    sha256_compress(c, c->buf);
+    for (i = 0; i < 8; i++) {
+        out[i*4]   = (u8)(c->h[i] >> 24);
+        out[i*4+1] = (u8)(c->h[i] >> 16);
+        out[i*4+2] = (u8)(c->h[i] >> 8);
+        out[i*4+3] = (u8)(c->h[i]);
+    }
+}
+
+static void hmac_sha256(const u8 *key, size_t klen,
+                        const u8 *msg, size_t mlen,
+                        u8 out[32])
+{
+    u8 k0[64];
+    u8 pad[64];
+    u8 tmp[32];
+    SHA256 ctx;
+    size_t i;
+
+    memset(k0, 0, 64);
+    if (klen > 64) {
+        SHA256 kc;
+        sha256_init(&kc);
+        sha256_feed(&kc, key, klen);
+        sha256_done(&kc, k0);
+    } else {
+        memcpy(k0, key, klen);
+    }
+
+    for (i = 0; i < 64; i++) pad[i] = (u8)(k0[i] ^ 0x36);
+    sha256_init(&ctx);
+    sha256_feed(&ctx, pad, 64);
+    sha256_feed(&ctx, msg, mlen);
+    sha256_done(&ctx, tmp);
+
+    for (i = 0; i < 64; i++) pad[i] = (u8)(k0[i] ^ 0x5c);
+    sha256_init(&ctx);
+    sha256_feed(&ctx, pad, 64);
+    sha256_feed(&ctx, tmp, 32);
+    sha256_done(&ctx, out);
+}
+
+/* =========================================================================
+ * AES-128 ECB decrypt
+ * ========================================================================= */
+static const u8 Si[256] = {
+ 0x52,0x09,0x6a,0xd5,0x30,0x36,0xa5,0x38,0xbf,0x40,0xa3,0x9e,0x81,0xf3,0xd7,0xfb,
+ 0x7c,0xe3,0x39,0x82,0x9b,0x2f,0xff,0x87,0x34,0x8e,0x43,0x44,0xc4,0xde,0xe9,0xcb,
+ 0x54,0x7b,0x94,0x32,0xa6,0xc2,0x23,0x3d,0xee,0x4c,0x95,0x0b,0x42,0xfa,0xc3,0x4e,
+ 0x08,0x2e,0xa1,0x66,0x28,0xd9,0x24,0xb2,0x76,0x5b,0xa2,0x49,0x6d,0x8b,0xd1,0x25,
+ 0x72,0xf8,0xf6,0x64,0x86,0x68,0x98,0x16,0xd4,0xa4,0x5c,0xcc,0x5d,0x65,0xb6,0x92,
+ 0x6c,0x70,0x48,0x50,0xfd,0xed,0xb9,0xda,0x5e,0x15,0x46,0x57,0xa7,0x8d,0x9d,0x84,
+ 0x90,0xd8,0xab,0x00,0x8c,0xbc,0xd3,0x0a,0xf7,0xe4,0x58,0x05,0xb8,0xb3,0x45,0x06,
+ 0xd0,0x2c,0x1e,0x8f,0xca,0x3f,0x0f,0x02,0xc1,0xaf,0xbd,0x03,0x01,0x13,0x8a,0x6b,
+ 0x3a,0x91,0x11,0x41,0x4f,0x67,0xdc,0xea,0x97,0xf2,0xcf,0xce,0xf0,0xb4,0xe6,0x73,
+ 0x96,0xac,0x74,0x22,0xe7,0xad,0x35,0x85,0xe2,0xf9,0x37,0xe8,0x1c,0x75,0xdf,0x6e,
+ 0x47,0xf1,0x1a,0x71,0x1d,0x29,0xc5,0x89,0x6f,0xb7,0x62,0x0e,0xaa,0x18,0xbe,0x1b,
+ 0xfc,0x56,0x3e,0x4b,0xc6,0xd2,0x79,0x20,0x9a,0xdb,0xc0,0xfe,0x78,0xcd,0x5a,0xf4,
+ 0x1f,0xdd,0xa8,0x33,0x88,0x07,0xc7,0x31,0xb1,0x12,0x10,0x59,0x27,0x80,0xec,0x5f,
+ 0x60,0x51,0x7f,0xa9,0x19,0xb5,0x4a,0x0d,0x2d,0xe5,0x7a,0x9f,0x93,0xc9,0x9c,0xef,
+ 0xa0,0xe0,0x3b,0x4d,0xae,0x2a,0xf5,0xb0,0xc8,0xeb,0xbb,0x3c,0x83,0x53,0x99,0x61,
+ 0x17,0x2b,0x04,0x7e,0xba,0x77,0xd6,0x26,0xe1,0x69,0x14,0x63,0x55,0x21,0x0c,0x7d
+};
+
+static const u8 Sbox[256] = {
+ 0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
+ 0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
+ 0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,
+ 0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,
+ 0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,
+ 0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,
+ 0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,
+ 0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,
+ 0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,
+ 0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,
+ 0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,
+ 0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,
+ 0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,
+ 0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,
+ 0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,
+ 0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16
+};
+
+static const u8 RC[11] = {0x00,0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36};
+
+static u8 xtime(u8 x) { return (u8)((x<<1) ^ ((x>>7) * 0x1b)); }
+
+static u8 gmul(u8 a, u8 b)
+{
+    u8 p = 0;
+    int i;
+    for (i = 0; i < 8; i++) {
+        if (b & 1) p ^= a;
+        a = xtime(a);
+        b >>= 1;
+    }
+    return p;
+}
+
+typedef u8 State[4][4];
+
+static void AddRoundKey(State s, const u8 rk[16])
+{
+    int r,c;
+    for (c = 0; c < 4; c++) for (r = 0; r < 4; r++) s[c][r] ^= rk[c*4+r];
+}
+
+static void InvSubBytes(State s)
+{
+    int r,c;
+    for (c = 0; c < 4; c++) for (r = 0; r < 4; r++) s[c][r] = Si[s[c][r]];
+}
+
+static void InvShiftRows(State s)
+{
+    u8 t;
+    t=s[3][1]; s[3][1]=s[2][1]; s[2][1]=s[1][1]; s[1][1]=s[0][1]; s[0][1]=t;
+    t=s[0][2]; s[0][2]=s[2][2]; s[2][2]=t;
+    t=s[1][2]; s[1][2]=s[3][2]; s[3][2]=t;
+    t=s[0][3]; s[0][3]=s[1][3]; s[1][3]=s[2][3]; s[2][3]=s[3][3]; s[3][3]=t;
+}
+
+static void InvMixColumns(State s)
+{
+    int c; u8 a,b,cc,d;
+    for (c = 0; c < 4; c++) {
+        a=s[c][0]; b=s[c][1]; cc=s[c][2]; d=s[c][3];
+        s[c][0] = gmul(a,0x0e)^gmul(b,0x0b)^gmul(cc,0x0d)^gmul(d,0x09);
+        s[c][1] = gmul(a,0x09)^gmul(b,0x0e)^gmul(cc,0x0b)^gmul(d,0x0d);
+        s[c][2] = gmul(a,0x0d)^gmul(b,0x09)^gmul(cc,0x0e)^gmul(d,0x0b);
+        s[c][3] = gmul(a,0x0b)^gmul(b,0x0d)^gmul(cc,0x09)^gmul(d,0x0e);
+    }
+}
+
+static void KeyExpansion(const u8 key[16], u8 rk[11][16])
+{
+    int i,j; u8 tmp[4];
+    memcpy(rk[0], key, 16);
+    for (i = 1; i < 11; i++) {
+        tmp[0] = (u8)(Sbox[rk[i-1][13]] ^ RC[i]);
+        tmp[1] = Sbox[rk[i-1][14]];
+        tmp[2] = Sbox[rk[i-1][15]];
+        tmp[3] = Sbox[rk[i-1][12]];
+        for (j = 0; j < 4; j++) rk[i][j] = (u8)(rk[i-1][j] ^ tmp[j]);
+        for (j = 0; j < 4; j++) rk[i][j+4] = (u8)(rk[i-1][j+4] ^ rk[i][j]);
+        for (j = 0; j < 4; j++) rk[i][j+8] = (u8)(rk[i-1][j+8] ^ rk[i][j+4]);
+        for (j = 0; j < 4; j++) rk[i][j+12] = (u8)(rk[i-1][j+12] ^ rk[i][j+8]);
+    }
+}
+
+static void aes128_ecb_decrypt(const u8 key[16], const u8 *in, u8 *out, int blocks)
+{
+    u8 rk[11][16];
+    State s;
+    int b,r,c,row;
+    KeyExpansion(key, rk);
+    for (b = 0; b < blocks; b++) {
+        for (c = 0; c < 4; c++) for (row = 0; row < 4; row++) s[c][row] = in[b*16 + c*4 + row];
+        AddRoundKey(s, rk[10]);
+        for (r = 9; r >= 1; r--) {
+            InvShiftRows(s);
+            InvSubBytes(s);
+            AddRoundKey(s, rk[r]);
+            InvMixColumns(s);
+        }
+        InvShiftRows(s);
+        InvSubBytes(s);
+        AddRoundKey(s, rk[0]);
+        for (c = 0; c < 4; c++) for (row = 0; row < 4; row++) out[b*16 + c*4 + row] = s[c][row];
+    }
+}
+
+/* =========================================================================
+ * Helpers: hex parsing
+ * ========================================================================= */
+static int hex_val(char c)
+{
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+static int from_hex(u8 *out, int out_max, const char *hex)
+{
+    int i;
+    int len = (int)strlen(hex);
+    if (len % 2 != 0 || (len/2) > out_max) return -1;
+    for (i = 0; i < len; i += 2) {
+        int hi = hex_val(hex[i]);
+        int lo = hex_val(hex[i+1]);
+        if (hi < 0 || lo < 0) return -1;
+        out[i/2] = (u8)((hi<<4) | lo);
+    }
+    return len/2;
+}
+
+/* =========================================================================
+ * Public API
+ * ========================================================================= */
+int grp_txt_decrypt_and_parse(const uint8_t *payload, uint16_t payload_len,
+                             const char *label_hex,
+                             uint32_t *timestamp_out,
+                             uint8_t *txt_type_out,
+                             uint8_t *attempt_out,
+                             uint8_t signer_prefix_out[4],
+                             int *has_signer_prefix_out,
+                             int *mac_ok_out,
+                             char *msg_out, size_t msg_out_len)
+{
+    u8 secret32[32];
+    u8 hmac_out[32];
+    u8 plain[512];
+    u32 mac_expected, mac_computed;
+    const u8 *ct;
+    int ct_len;
+    u8 flags;
+    u8 txt_type;
+    u8 attempt;
+    int body_off;
+    size_t tlen;
+
+    if (!payload || payload_len < 3 || !label_hex || !msg_out || msg_out_len == 0) {
+        return -1;
+    }
+
+    /* label_hex is 16-byte secret (32 hex chars) */
+    memset(secret32, 0, sizeof(secret32));
+    if (from_hex(secret32, 16, label_hex) != 16) {
+        return -1;
+    }
+
+    /* payload: [chan_hash][mac_le16][ciphertext...] */
+    mac_expected = (u32)payload[1] | ((u32)payload[2] << 8);
+    ct = payload + 3;
+    ct_len = (int)payload_len - 3;
+    if (ct_len <= 0 || (ct_len % 16) != 0 || ct_len > (int)sizeof(plain)) {
+        return -1;
+    }
+
+    /* Verify MAC = first 2 bytes of HMAC-SHA256(secret32, ciphertext), little-endian */
+    hmac_sha256(secret32, 32, ct, (size_t)ct_len, hmac_out);
+    mac_computed = (u32)hmac_out[0] | ((u32)hmac_out[1] << 8);
+    if (mac_ok_out) {
+        *mac_ok_out = (mac_computed == mac_expected) ? 1 : 0;
+    }
+
+    /* Decrypt AES-128-ECB with key=secret[0..15] */
+    aes128_ecb_decrypt(secret32, ct, plain, ct_len/16);
+
+    if (ct_len < 5) {
+        return -1;
+    }
+
+    if (timestamp_out) {
+        *timestamp_out = (u32)plain[0] | ((u32)plain[1] << 8) | ((u32)plain[2] << 16) | ((u32)plain[3] << 24);
+    }
+
+    flags = plain[4];
+    attempt = (u8)(flags & 0x03);
+    txt_type = (u8)((flags >> 2) & 0x3F);
+
+    if (txt_type_out) *txt_type_out = txt_type;
+    if (attempt_out) *attempt_out = attempt;
+
+    body_off = 5;
+    if (has_signer_prefix_out) *has_signer_prefix_out = 0;
+
+    /* best-effort: txt_type==2 -> signed message with 4-byte prefix */
+    if (txt_type == 2 && ct_len >= 9) {
+        if (signer_prefix_out) {
+            signer_prefix_out[0] = plain[5];
+            signer_prefix_out[1] = plain[6];
+            signer_prefix_out[2] = plain[7];
+            signer_prefix_out[3] = plain[8];
+        }
+        if (has_signer_prefix_out) *has_signer_prefix_out = 1;
+        body_off = 9;
+    }
+
+    /* Copy NUL-terminated text body */
+    tlen = 0;
+    while ((int)(body_off + (int)tlen) < ct_len && plain[body_off + (int)tlen] != 0) {
+        tlen++;
+    }
+
+    if (tlen + 1 > msg_out_len) {
+        tlen = msg_out_len - 1;
+    }
+
+    memcpy(msg_out, plain + body_off, tlen);
+    msg_out[tlen] = '\0';
+    return 0;
+}

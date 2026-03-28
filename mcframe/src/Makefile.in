@@ -109,7 +109,8 @@ am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	ptype_response.$(OBJEXT) ptype_txt_msg.$(OBJEXT) \
 	ptype_ack.$(OBJEXT) ptype_advert.$(OBJEXT) \
 	ptype_grp_txt.$(OBJEXT) ptype_path.$(OBJEXT) \
-	util_hex.$(OBJEXT) util_channels.$(OBJEXT)
+	grp_txt_decrypt.$(OBJEXT) util_hex.$(OBJEXT) \
+	util_channels.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -127,7 +128,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
+am__depfiles_remade = ./$(DEPDIR)/dispatch.Po \
+	./$(DEPDIR)/grp_txt_decrypt.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/onair.Po ./$(DEPDIR)/op_0C.Po ./$(DEPDIR)/op_80.Po \
 	./$(DEPDIR)/op_83.Po ./$(DEPDIR)/op_88.Po ./$(DEPDIR)/op_8A.Po \
 	./$(DEPDIR)/op_default.Po ./$(DEPDIR)/ptype_ack.Po \
@@ -284,8 +286,9 @@ mcframe_SOURCES = \
   ptype_advert.c \
   ptype_grp_txt.c \
   ptype_path.c \
-  util_hex.c \
-  util_channels.c util_hex.h
+  grp_txt_decrypt.c grp_txt_decrypt.h \
+  util_hex.c util_hex.h \
+  util_channels.c util_channels.h
 
 all: all-am
 
@@ -374,6 +377,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dispatch.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grp_txt_decrypt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onair.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/op_0C.Po@am__quote@ # am--include-marker
@@ -544,6 +548,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f ./$(DEPDIR)/dispatch.Po
+	-rm -f ./$(DEPDIR)/grp_txt_decrypt.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/onair.Po
 	-rm -f ./$(DEPDIR)/op_0C.Po
@@ -609,6 +614,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/dispatch.Po
+	-rm -f ./$(DEPDIR)/grp_txt_decrypt.Po
 	-rm -f ./$(DEPDIR)/main.Po
 	-rm -f ./$(DEPDIR)/onair.Po
 	-rm -f ./$(DEPDIR)/op_0C.Po
