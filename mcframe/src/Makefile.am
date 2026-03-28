@@ -1,7 +1,7 @@
 bin_PROGRAMS = mcframe
 mcframe_SOURCES = \
   main.c \
-  dispatch.c dispatch.h \
+  dispatch.c dispatch.h ops.h \
   op_default.c \
   op_80.c \
   op_83.c \
@@ -19,5 +19,5 @@ mcframe_SOURCES = \
   ptype_grp_txt.c \
   ptype_path.c \
   grp_txt_decrypt.c grp_txt_decrypt.h \
-  util_hex.c util_hex.h \
-  util_channels.c util_channels.h
+  util_channels.c util_channels.h \
+  util_hex.c util_hex.h

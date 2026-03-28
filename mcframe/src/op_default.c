@@ -1,14 +1,19 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
 
+#include "ops.h"
 #include "util_hex.h"
 
-void op_default(uint8_t opcode, const uint8_t *payload, unsigned len)
+void op_default(const uint8_t *frame, size_t len)
 {
-    printf("UNKNOWN_TOPLEVEL (0x%02X): len=%u (nog niet gedecodeerd)\n", (unsigned)opcode, (unsigned)len);
-    if (payload && len > 0) {
-        printf("  hexdump: ");
-        util_hex_dump(payload, (size_t)len);
-        printf("\n");
+    if (!frame || len == 0) {
+        printf("UNKNOWN_TOPLEVEL: len=%u (leeg)\n", (unsigned)len);
+        return;
     }
+
+    printf("UNKNOWN_TOPLEVEL (0x%02X): len=%u (nog niet gedecodeerd)\n", (unsigned)frame[0], (unsigned)len);
+    printf("  hexdump: ");
+    util_hex_dump(frame, len);
+    printf("\n");
 }
