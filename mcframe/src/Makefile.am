@@ -1,3 +1,5 @@
+AM_CFLAGS = -Wall -Wextra -Wpedantic -Werror
+
 bin_PROGRAMS = mcframe
 mcframe_SOURCES = \
   main.c \

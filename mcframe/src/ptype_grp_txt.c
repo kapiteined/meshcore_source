@@ -19,10 +19,10 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     uint16_t mac;
     unsigned ct_len;
     const uint8_t *ct;
-    const char *label;
 
     if (pkt->payload_len < 3) {
-        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3)\n", (unsigned)pkt->payload_len);
+        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3)", (unsigned)pkt->payload_len);
+        putchar('\n');
         return;
     }
 
@@ -32,34 +32,47 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     ct_len = (unsigned)pkt->payload_len - 3;
     ct = &p[3];
 
-    label = util_chan_hash_label(chan_hash);
+    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u", (unsigned)chan_hash, (unsigned)mac, ct_len);
+    putchar('\n');
 
-    /* Always show outer+raw; try to decrypt if label is known */
-    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u\n", (unsigned)chan_hash, (unsigned)mac, ct_len);
-
-    printf("  GRP_TXT raw (mac+ciphertext) (label=%s): ", label);
+    printf("  GRP_TXT raw (mac+ciphertext): ");
     util_hex_dump(&p[1], (size_t)pkt->payload_len - 1);
-    printf("\n");
+    putchar('\n');
 
-    if (label && strcmp(label, "onbekend") != 0) {
-        uint32_t ts;
-        uint8_t txt_type;
-        uint8_t attempt;
-        uint8_t signer_prefix[4];
-        int has_prefix;
-        int mac_ok;
-        char msg[256];
+    {
+        const chan_secret_entry_t *e = util_chan_secret_first(chan_hash);
+        while (e) {
+            uint32_t ts = 0;
+            uint8_t txt_type = 0;
+            uint8_t attempt = 0;
+            uint8_t signer_prefix[4];
+            int has_prefix = 0;
+            int mac_ok = 0;
+            char msg[256];
 
-        if (grp_txt_decrypt_and_parse(p, pkt->payload_len, label, &ts, &txt_type, &attempt, signer_prefix, &has_prefix, &mac_ok, msg, sizeof(msg)) == 0) {
-            printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u mac=%s", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, mac_ok ? "OK" : "BAD");
-            if (has_prefix) {
-                printf(" signer_prefix=%02x%02x%02x%02x", (unsigned)signer_prefix[0], (unsigned)signer_prefix[1], (unsigned)signer_prefix[2], (unsigned)signer_prefix[3]);
+            if (grp_txt_decrypt_and_parse(p, pkt->payload_len, e->secret_hex,
+                                          &ts, &txt_type, &attempt,
+                                          signer_prefix, &has_prefix,
+                                          &mac_ok,
+                                          msg, sizeof(msg)) == 0 && mac_ok) {
+
+                printf("  GRP_TXT match: channel='%s' secret=%s", e->name ? e->name : "(noname)", e->secret_hex);
+                putchar('\n');
+
+                printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u mac=OK", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt);
+                if (has_prefix) {
+                    printf(" signer_prefix=%02x%02x%02x%02x", (unsigned)signer_prefix[0], (unsigned)signer_prefix[1], (unsigned)signer_prefix[2], (unsigned)signer_prefix[3]);
+                }
+                printf(" msg=%s", msg);
+                putchar('\n');
+                return;
             }
-            printf(" msg=%s\n", msg);
-            return;
+
+            e = util_chan_secret_next(chan_hash, e);
         }
     }
 
-    /* Fallback */
+    printf("  GRP_TXT: geen matchende secret gevonden voor chan_hash=0x%02X (MAC blijft BAD)", (unsigned)chan_hash);
+    putchar('\n');
     util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);
 }

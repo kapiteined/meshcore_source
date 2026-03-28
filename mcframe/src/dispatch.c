@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "dispatch.h"
 #include "ops.h"
 
@@ -15,6 +16,5 @@ void dispatch_frame(const uint8_t *frame, size_t len)
         default:   op_default(frame, len); break;
     }
 
-    /* Scheiding tussen frames */
-    printf("\n");
+    putchar('\n');
 }

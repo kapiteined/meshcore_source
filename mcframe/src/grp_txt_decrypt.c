@@ -409,41 +409,25 @@ int grp_txt_decrypt_and_parse(const uint8_t *payload, uint16_t payload_len,
     if (mac_ok_out) *mac_ok_out = 0;
     if (msg_out && msg_out_len > 0) msg_out[0] = '\0';
 
-    if (!payload || payload_len < 3 || !label_hex || !msg_out || msg_out_len == 0) {
-        return -1;
-    }
+    if (!payload || payload_len < 3 || !label_hex || !msg_out || msg_out_len == 0) return -1;
 
-    /* Parse secret hex (16 bytes) and pad to 32 bytes for HMAC key */
     memset(secret32, 0, sizeof(secret32));
-    if (from_hex(secret32, 16, label_hex) != 16) {
-        return -1;
-    }
+    if (from_hex(secret32, 16, label_hex) != 16) return -1;
 
-    /* Layout: [chan_hash][mac_le16][ciphertext...] */
     mac_expected = (u32)payload[1] | ((u32)payload[2] << 8);
     ct = (const u8 *)(payload + 3);
     ct_len = (int)payload_len - 3;
-    if (ct_len <= 0 || (ct_len % 16) != 0) {
-        return -1;
-    }
-    if (ct_len > (int)sizeof(plain)) {
-        return -1;
-    }
+    if (ct_len <= 0 || (ct_len % 16) != 0) return -1;
+    if (ct_len > (int)sizeof(plain)) return -1;
     blocks = ct_len / 16;
 
-    /* Verify MAC = HMAC-SHA256(secret32, ciphertext)[0..1] little-endian */
     hmac_sha256(secret32, 32, ct, (size_t)ct_len, hmac_out);
     mac_computed = (u32)hmac_out[0] | ((u32)hmac_out[1] << 8);
-    if (mac_ok_out) {
-        *mac_ok_out = (mac_computed == mac_expected) ? 1 : 0;
-    }
+    if (mac_ok_out) *mac_ok_out = (mac_computed == mac_expected) ? 1 : 0;
 
-    /* Decrypt ciphertext */
     aes128_ecb_decrypt(secret32, ct, plain, blocks);
 
-    if (ct_len < 5) {
-        return -1;
-    }
+    if (ct_len < 5) return -1;
 
     if (timestamp_out) {
         *timestamp_out = (u32)plain[0] | ((u32)plain[1] << 8) | ((u32)plain[2] << 16) | ((u32)plain[3] << 24);
@@ -456,7 +440,6 @@ int grp_txt_decrypt_and_parse(const uint8_t *payload, uint16_t payload_len,
     if (attempt_out) *attempt_out = attempt;
 
     body_off = 5;
-    /* Best-effort: txt_type==2 => signed, skip 4-byte prefix */
     if (txt_type == 2 && ct_len >= 9) {
         if (signer_prefix_out) {
             signer_prefix_out[0] = plain[5];
@@ -468,18 +451,11 @@ int grp_txt_decrypt_and_parse(const uint8_t *payload, uint16_t payload_len,
         body_off = 9;
     }
 
-    /* Extract NUL-terminated string */
     tlen = 0;
-    while ((int)(body_off + (int)tlen) < ct_len && plain[body_off + tlen] != '\0') {
-        tlen++;
-    }
-    if (tlen + 1 > msg_out_len) {
-        tlen = msg_out_len - 1;
-    }
+    while ((int)(body_off + (int)tlen) < ct_len && plain[body_off + tlen] != '\0') tlen++;
+    if (tlen + 1 > msg_out_len) tlen = msg_out_len - 1;
 
-    for (i = 0; i < tlen; i++) {
-        msg_out[i] = (char)plain[body_off + i];
-    }
+    for (i = 0; i < tlen; i++) msg_out[i] = (char)plain[body_off + i];
     msg_out[tlen] = '\0';
 
     return 0;

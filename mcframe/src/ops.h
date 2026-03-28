@@ -4,14 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Companion top-level opcode handlers (frame[0] is the opcode). */
 void op_80(const uint8_t *frame, size_t len);
 void op_83(const uint8_t *frame, size_t len);
 void op_88(const uint8_t *frame, size_t len);
 void op_8A(const uint8_t *frame, size_t len);
 void op_0C(const uint8_t *frame, size_t len);
-
-/* Default handler for unknown opcodes. */
 void op_default(const uint8_t *frame, size_t len);
 
 #endif
