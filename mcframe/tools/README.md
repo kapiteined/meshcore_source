@@ -1,5 +1,5 @@
 # mcframe/tools
 
-Reference standalone decoders.
+Reference standalone decoder kept for standalone use:
 
-- meshcore_decoder_ref.c : original standalone reference.
+- meshcore_decoder_ref.c

@@ -13,7 +13,8 @@ static const chan_label_t g_chan_labels[] = {
 
 const char *util_chan_hash_label(uint8_t chan_hash)
 {
-    for (size_t i = 0; i < (sizeof(g_chan_labels) / sizeof(g_chan_labels[0])); i++) {
+    size_t i;
+    for (i = 0; i < (sizeof(g_chan_labels) / sizeof(g_chan_labels[0])); i++) {
         if (g_chan_labels[i].chan_hash == chan_hash) {
             return g_chan_labels[i].label;
         }
