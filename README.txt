@@ -12,14 +12,14 @@ Doxygen (HTML only):
   mkdir -p docs/doxygen
   doxygen Doxyfile
 
-Ptype handlers implemented:
-  - REQ (0x00): ptype_req.c (outer header only)
-  - RESPONSE (0x01): ptype_response.c
-  - TXT_MSG (0x02): ptype_txt_msg.c
-  - ACK (0x03): ptype_ack.c
-  - ADVERT (0x04): ptype_advert.c
-  - GRP_TXT (0x05): ptype_grp_txt.c
-  - PATH (0x08): ptype_path.c
+Change:
+  For all payload types with remaining ciphertext after parsing the outer header,
+  we now print a ciphertext hex line:
+    "<PTYPE>: deze ciphertext kan ik niet decrypten: <hex>"
 
-Note:
-  Encrypted payloads are not decrypted; only outer headers are printed.
+Affected ptypes:
+  - REQ (0x00)
+  - RESPONSE (0x01)
+  - TXT_MSG (0x02)
+  - GRP_TXT (0x05)
+  - PATH (0x08)

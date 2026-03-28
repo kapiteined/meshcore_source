@@ -28,9 +28,7 @@ int onair_parse(const uint8_t *raw, size_t raw_len, onair_packet_t *out) {
     out->payload_len = raw_len - i;
     return 0;
 }
-const char* onair_route_name(uint8_t rt) {
-    switch (rt) { case 0: return "TRANSPORT_FLOOD"; case 1: return "FLOOD"; case 2: return "DIRECT"; case 3: return "TRANSPORT_DIRECT"; default: return "RT_UNKNOWN"; }
-}
+const char* onair_route_name(uint8_t rt) { switch (rt) { case 0: return "TRANSPORT_FLOOD"; case 1: return "FLOOD"; case 2: return "DIRECT"; case 3: return "TRANSPORT_DIRECT"; default: return "RT_UNKNOWN"; } }
 const char* onair_payload_name(uint8_t pt) {
     switch (pt) {
         case 0x00: return "REQ"; case 0x01: return "RESPONSE"; case 0x02: return "TXT_MSG"; case 0x03: return "ACK";

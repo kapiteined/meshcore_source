@@ -30,14 +30,8 @@ void ptype_advert(const onair_packet_t *pkt) {
         i += 8;
         printf(" loc=%.6f,%.6f", (double)lat_i/1000000.0, (double)lon_i/1000000.0);
     }
-    if (flags & 0x20) {
-        if (app_len < i + 2) { printf(" (truncated feature1)\n"); return; }
-        uint16_t f1 = u16le(&app[i]); i += 2; printf(" f1=0x%04X", (unsigned)f1);
-    }
-    if (flags & 0x40) {
-        if (app_len < i + 2) { printf(" (truncated feature2)\n"); return; }
-        uint16_t f2 = u16le(&app[i]); i += 2; printf(" f2=0x%04X", (unsigned)f2);
-    }
+    if (flags & 0x20) { if (app_len < i + 2) { printf(" (truncated feature1)\n"); return; } uint16_t f1 = u16le(&app[i]); i += 2; printf(" f1=0x%04X", (unsigned)f1); }
+    if (flags & 0x40) { if (app_len < i + 2) { printf(" (truncated feature2)\n"); return; } uint16_t f2 = u16le(&app[i]); i += 2; printf(" f2=0x%04X", (unsigned)f2); }
     if (flags & 0x80) {
         size_t nlen = (app_len > i) ? (app_len - i) : 0;
         char name[65];

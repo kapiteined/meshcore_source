@@ -108,7 +108,8 @@ am_mcframe_OBJECTS = main.$(OBJEXT) dispatch.$(OBJEXT) \
 	ptype_default.$(OBJEXT) ptype_req.$(OBJEXT) \
 	ptype_response.$(OBJEXT) ptype_txt_msg.$(OBJEXT) \
 	ptype_ack.$(OBJEXT) ptype_advert.$(OBJEXT) \
-	ptype_grp_txt.$(OBJEXT) ptype_path.$(OBJEXT)
+	ptype_grp_txt.$(OBJEXT) ptype_path.$(OBJEXT) \
+	util_hex.$(OBJEXT)
 mcframe_OBJECTS = $(am_mcframe_OBJECTS)
 mcframe_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -133,7 +134,8 @@ am__depfiles_remade = ./$(DEPDIR)/dispatch.Po ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/ptype_advert.Po ./$(DEPDIR)/ptype_default.Po \
 	./$(DEPDIR)/ptype_dispatch.Po ./$(DEPDIR)/ptype_grp_txt.Po \
 	./$(DEPDIR)/ptype_path.Po ./$(DEPDIR)/ptype_req.Po \
-	./$(DEPDIR)/ptype_response.Po ./$(DEPDIR)/ptype_txt_msg.Po
+	./$(DEPDIR)/ptype_response.Po ./$(DEPDIR)/ptype_txt_msg.Po \
+	./$(DEPDIR)/util_hex.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -281,7 +283,8 @@ mcframe_SOURCES = \
   ptype_ack.c \
   ptype_advert.c \
   ptype_grp_txt.c \
-  ptype_path.c
+  ptype_path.c \
+  util_hex.c util_hex.h
 
 all: all-am
 
@@ -387,6 +390,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_req.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_response.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptype_txt_msg.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util_hex.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -555,6 +559,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/ptype_req.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
 	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
+	-rm -f ./$(DEPDIR)/util_hex.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -618,6 +623,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/ptype_req.Po
 	-rm -f ./$(DEPDIR)/ptype_response.Po
 	-rm -f ./$(DEPDIR)/ptype_txt_msg.Po
+	-rm -f ./$(DEPDIR)/util_hex.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
