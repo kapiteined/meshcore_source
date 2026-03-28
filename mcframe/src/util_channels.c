@@ -8,7 +8,7 @@ typedef struct {
 
 static const chan_label_t g_chan_labels[] = {
     { 0x11, "8b3387e9c5cdea6ac9e5edbaa115cd72" },
-    { 0xd9, "9cd8fcf22a47333b591d96a2b848b73f" },
+    { 0xD9, "9cd8fcf22a47333b591d96a2b848b73f" },
 };
 
 const char *util_chan_hash_label(uint8_t chan_hash)

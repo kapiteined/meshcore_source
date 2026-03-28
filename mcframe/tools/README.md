@@ -1,8 +1,5 @@
 # mcframe/tools
 
-Standalone reference decoders kept for convenience.
+Reference standalone decoders.
 
-- `meshcore_decoder_ref.c`    : original reference version.
-- `meshcore_decoder_struct.c` : variant that prints TxtType/Attempt.
-
-These tools are **not** part of the `mcframe` binary build.
+- meshcore_decoder_ref.c : original standalone reference.

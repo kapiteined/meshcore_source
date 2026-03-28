@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ptype_dispatch.h"
 #include "util_hex.h"
@@ -14,7 +15,7 @@ static uint16_t u16le16(const uint8_t *p)
 void ptype_grp_txt(const onair_packet_t *pkt)
 {
     if (pkt->payload_len < 3) {
-        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3) ", (unsigned)pkt->payload_len);
+        printf("  GRP_TXT outer: too_short payload_len=%u (need >=3)\n", (unsigned)pkt->payload_len);
         return;
     }
 
@@ -27,7 +28,6 @@ void ptype_grp_txt(const onair_packet_t *pkt)
 
     const char *label = util_chan_hash_label(chan_hash);
 
-    /* Try decrypt+parse using the label as 16-byte secret hex */
     {
         uint32_t ts = 0;
         uint8_t txt_type = 0;
@@ -37,7 +37,7 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         int mac_ok = 0;
         char msg[256];
 
-        if (label && (label[0] != 'o' || label[1] != 'n')) {
+        if (label && strcmp(label, "onbekend") != 0) {
             if (grp_txt_decrypt_and_parse(p, pkt->payload_len, label,
                                           &ts, &txt_type, &attempt,
                                           signer_prefix, &has_prefix,
@@ -47,16 +47,12 @@ void ptype_grp_txt(const onair_packet_t *pkt)
 
                 printf("  GRP_TXT raw (mac+ciphertext) (label=%s): ", label);
                 util_hex_dump(&p[1], (size_t)pkt->payload_len - 1);
-                printf(" ");
+                printf("\n");
 
-                printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt);
-                if (!mac_ok) {
-                    printf(" mac=BAD");
-                } else {
-                    printf(" mac=OK");
-                }
+                printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u mac=%s ", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, mac_ok ? "OK" : "BAD");
                 if (has_prefix) {
-                    printf(" signer_prefix=%02x%02x%02x%02x", (unsigned)signer_prefix[0], (unsigned)signer_prefix[1],
+                    printf(" signer_prefix=%02x%02x%02x%02x",
+                           (unsigned)signer_prefix[0], (unsigned)signer_prefix[1],
                            (unsigned)signer_prefix[2], (unsigned)signer_prefix[3]);
                 }
                 printf(" msg=%s\n", msg);
@@ -65,12 +61,11 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         }
     }
 
-    /* Fallback: cannot decrypt/parse */
-    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u ", (unsigned)chan_hash, (unsigned)mac, ct_len);
+    printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u\n", (unsigned)chan_hash, (unsigned)mac, ct_len);
 
     printf("  GRP_TXT raw (mac+ciphertext) (label=%s): ", label);
     util_hex_dump(&p[1], (size_t)pkt->payload_len - 1);
-    printf(" ");
+    printf("\n");
 
     util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);
 }
