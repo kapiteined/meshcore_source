@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -18,6 +19,7 @@ static uint16_t u16le16(const uint8_t *p)
     return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
 }
 
+#ifdef MCFRAME_EXT_TOOL_PATH
 static void hex_to_cstr(const uint8_t *buf, size_t len, char *out)
 {
     static const char hexd[] = "0123456789abcdef";
@@ -30,8 +32,12 @@ static void hex_to_cstr(const uint8_t *buf, size_t len, char *out)
 
 static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
 {
-#ifdef MCFRAME_EXT_TOOL_PATH
     if (!label || !mac_ct || mac_ct_len == 0) {
+        return;
+    }
+
+    /* Only run the tool when label is known */
+    if (strcmp(label, "onbekend") == 0) {
         return;
     }
 
@@ -43,25 +49,81 @@ static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, si
     }
     hex_to_cstr(mac_ct, mac_ct_len, hex);
 
+    /* Capture child stdout+stderr to avoid interleaving with our own output */
+    int pipefd[2];
+    if (pipe(pipefd) != 0) {
+        free(hex);
+        return;
+    }
+
     pid_t pid = fork();
     if (pid == 0) {
-        /* child: exec external tool, argv: <prog> <label> <hex> */
+        /* child */
+        (void)close(pipefd[0]);
+        (void)dup2(pipefd[1], STDOUT_FILENO);
+        (void)dup2(pipefd[1], STDERR_FILENO);
+        (void)close(pipefd[1]);
+
         execl(MCFRAME_EXT_TOOL_PATH, MCFRAME_EXT_TOOL_PATH, label, hex, (char *)NULL);
         _exit(127);
     }
 
-    /* parent: we don't want to block decoding; do a non-blocking reap */
+    /* parent */
+    (void)close(pipefd[1]);
+
     if (pid > 0) {
-        (void)waitpid(pid, NULL, WNOHANG);
+        /* Read all output from tool and print it as a single block */
+        char buf[4096];
+        size_t used = 0;
+        char *out = NULL;
+
+        for (;;) {
+            ssize_t n = read(pipefd[0], buf, sizeof(buf));
+            if (n <= 0) {
+                break;
+            }
+            char *tmp = (char *)realloc(out, used + (size_t)n + 1);
+            if (!tmp) {
+                free(out);
+                out = NULL;
+                used = 0;
+                break;
+            }
+            out = tmp;
+            memcpy(out + used, buf, (size_t)n);
+            used += (size_t)n;
+            out[used] = 0;
+        }
+
+        (void)close(pipefd[0]);
+        (void)waitpid(pid, NULL, 0);
+
+        if (out && used > 0) {
+            /* Ensure our own output is flushed before printing the tool output */
+            fflush(stdout);
+            /* Prefix one line so it stays readable */
+            printf("  EXTTOOL (%s): %s", label, out);
+            /* If tool didn't end with newline, add one */
+            if (used > 0 && out[used-1] != ' ') {
+                printf(" ");
+            }
+        }
+
+        free(out);
+    } else {
+        (void)close(pipefd[0]);
     }
 
     free(hex);
+}
 #else
+static void maybe_run_external_tool(const char *label, const uint8_t *mac_ct, size_t mac_ct_len)
+{
     (void)label;
     (void)mac_ct;
     (void)mac_ct_len;
-#endif
 }
+#endif
 
 void ptype_grp_txt(const onair_packet_t *pkt)
 {
@@ -89,7 +151,6 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     util_hex_dump(mac_ct, mac_ct_len);
     printf(" ");
 
-    /* Optional: call external tool with <label> and <mac+ciphertext-hex> */
     maybe_run_external_tool(label, mac_ct, mac_ct_len);
 
     util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);

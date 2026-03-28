@@ -398,7 +398,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+/*
 printf(">%s-%s-%s<\n", argv[0], argv[1], argv[2]);
+*/
 
     len = meshcore_decode_grp_txt(argv[1], argv[2], msg, (int)sizeof(msg), &ts);
     if(len < 0) return 1;
