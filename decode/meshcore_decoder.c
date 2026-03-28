@@ -314,13 +314,13 @@ int meshcore_decode_grp_txt(const char *secret_hex, const char *mac_data_hex,
 
     memset(secret, 0, sizeof(secret));
     if(from_hex(secret, 16, secret_hex) != 16){
-        fprintf(stderr,"Error: channel secret must be exactly 32 hex chars (16 bytes)\n");
+        fprintf(stderr,"202603281550 Error: channel secret must be exactly 32 hex chars (16 bytes)\n");
         return -1;
     }
 
     total = from_hex(buf, MAX_PAYLOAD, mac_data_hex);
     if(total < 3){
-        fprintf(stderr,"Error: input too short (need at least 2 MAC bytes + 16 ciphertext bytes)\n");
+        fprintf(stderr,"202603281551 Error: input too short (need at least 2 MAC bytes + 16 ciphertext bytes)\n");
         return -1;
     }
 
@@ -329,7 +329,7 @@ int meshcore_decode_grp_txt(const char *secret_hex, const char *mac_data_hex,
     enc_len = total - 2;
 
     if(enc_len == 0 || enc_len % 16 != 0){
-        fprintf(stderr,"Error: ciphertext length (%d bytes) must be a non-zero multiple of 16\n", enc_len);
+        fprintf(stderr,"202603281552 Error: ciphertext length (%d bytes) must be a non-zero multiple of 16\n", enc_len);
         return -1;
     }
 
@@ -338,10 +338,10 @@ int meshcore_decode_grp_txt(const char *secret_hex, const char *mac_data_hex,
     mac_computed = (u32)hmac_out[0] | ((u32)hmac_out[1] << 8);
 
     if(mac_computed != mac_expected){
-        fprintf(stderr,"Warning: MAC mismatch (expected 0x%04X, got 0x%04X) -- wrong channel secret?\n",
+        fprintf(stderr,"202603281553 Warning: MAC mismatch (expected 0x%04X, got 0x%04X) -- wrong channel secret?\n",
                 mac_expected, mac_computed);
     } else {
-        fprintf(stderr,"MAC OK (0x%04X)\n", mac_expected);
+        fprintf(stderr,"202603281554 MAC OK (0x%04X)\n", mac_expected);
     }
 
     /* Decrypt AES-128-ECB */
@@ -352,7 +352,7 @@ int meshcore_decode_grp_txt(const char *secret_hex, const char *mac_data_hex,
      *   [uint32 timestamp LE (4 bytes)] [0x00] ["name: message" null-terminated] [zero-pad]
      */
     if(enc_len < 5){
-        fprintf(stderr,"Error: decrypted data too short\n");
+        fprintf(stderr,"202603281555 Error: decrypted data too short\n");
         return -1;
     }
 
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 
     if(argc < 3){
         fprintf(stderr,
-            "MeshCore group_text decoder\n\n"
+            "202603281556 MeshCore group_text decoder\n\n"
             "Usage:\n"
             "  %s <channel_secret_hex> <mac_and_ciphertext_hex>\n\n"
             "Arguments:\n"
@@ -397,6 +397,8 @@ int main(int argc, char *argv[])
             argv[0], argv[0]);
         return 1;
     }
+
+printf(">%s-%s-%s<\n", argv[0], argv[1], argv[2]);
 
     len = meshcore_decode_grp_txt(argv[1], argv[2], msg, (int)sizeof(msg), &ts);
     if(len < 0) return 1;
