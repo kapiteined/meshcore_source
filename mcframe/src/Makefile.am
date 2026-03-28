@@ -18,4 +18,5 @@ mcframe_SOURCES = \
   ptype_advert.c \
   ptype_grp_txt.c \
   ptype_path.c \
-  util_hex.c util_hex.h
+  util_hex.c \
+  util_channels.c util_hex.h
