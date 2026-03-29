@@ -9,8 +9,7 @@ AM_CPPFLAGS = \
   -I$(top_builddir) \
   -I$(top_srcdir) \
   -I$(srcdir) \
-  -DHAVE_CONFIG_H \
-  -DMCFRAME_EXT_TOOL_PATH=\"@MCFRAME_EXT_TOOL_PATH@\"
+  -DHAVE_CONFIG_H
 
 ## Alle C sources die in de binary moeten komen.
 ## Belangrijk: hier moeten óók ptype_trace.c en util_channels.c in staan,
@@ -33,6 +32,7 @@ mcframe_SOURCES = \
   ptype_ack.c \
   ptype_advert.c \
   ptype_grp_txt.c \
+  grp_txt_decrypt.c \
   ptype_path.c \
   ptype_trace.c \
   util_hex.c \
@@ -44,4 +44,5 @@ noinst_HEADERS = \
   onair.h \
   ptype_dispatch.h \
   util_hex.h \
-  util_channels.h
+  util_channels.h \
+  grp_txt_decrypt.h
