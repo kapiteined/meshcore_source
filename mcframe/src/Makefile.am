@@ -1,17 +1,31 @@
-AM_CFLAGS = -Wall -Wextra -Wpedantic -Werror
+## mcframe/src/Makefile.am
 
+## Bouw één programma: mcframe
 bin_PROGRAMS = mcframe
+
+## Zorg dat config.h gevonden wordt en dat includes overeenkomen met jouw build
+## (jij ziet in de compilerregel: -DHAVE_CONFIG_H -I. -I../..)
+AM_CPPFLAGS = \
+  -I$(top_builddir) \
+  -I$(top_srcdir) \
+  -I$(srcdir) \
+  -DHAVE_CONFIG_H \
+  -DMCFRAME_EXT_TOOL_PATH=\"@MCFRAME_EXT_TOOL_PATH@\"
+
+## Alle C sources die in de binary moeten komen.
+## Belangrijk: hier moeten óók ptype_trace.c en util_channels.c in staan,
+## anders krijg je undefined reference errors bij linken.
 mcframe_SOURCES = \
   main.c \
-  dispatch.c dispatch.h ops.h \
+  dispatch.c \
+  onair.c \
   op_default.c \
   op_80.c \
   op_83.c \
   op_88.c \
   op_8A.c \
   op_0C.c \
-  onair.c onair.h \
-  ptype_dispatch.c ptype_dispatch.h \
+  ptype_dispatch.c \
   ptype_default.c \
   ptype_req.c \
   ptype_response.c \
@@ -20,6 +34,14 @@ mcframe_SOURCES = \
   ptype_advert.c \
   ptype_grp_txt.c \
   ptype_path.c \
-  grp_txt_decrypt.c grp_txt_decrypt.h \
-  util_channels.c util_channels.h \
-  util_hex.c util_hex.h
+  ptype_trace.c \
+  util_hex.c \
+  util_channels.c
+
+## (Optioneel, maar netjes): headers opnemen voor distributie/IDE’s.
+noinst_HEADERS = \
+  dispatch.h \
+  onair.h \
+  ptype_dispatch.h \
+  util_hex.h \
+  util_channels.h

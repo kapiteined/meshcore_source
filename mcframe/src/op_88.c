@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "ops.h"
 #include "onair.h"
 #include "ptype_dispatch.h"
 static int8_t i8(uint8_t b) { return (int8_t)b; }

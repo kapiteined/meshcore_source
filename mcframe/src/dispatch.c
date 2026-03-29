@@ -1,10 +1,13 @@
-#include <stdio.h>
-
 #include "dispatch.h"
-#include "ops.h"
 
-void dispatch_frame(const uint8_t *frame, size_t len)
-{
+void op_80(const uint8_t *frame, size_t len);
+void op_83(const uint8_t *frame, size_t len);
+void op_88(const uint8_t *frame, size_t len);
+void op_8A(const uint8_t *frame, size_t len);
+void op_0C(const uint8_t *frame, size_t len);
+void op_default(const uint8_t *frame, size_t len);
+
+void dispatch_frame(const uint8_t *frame, size_t len) {
     if (!frame || len == 0) return;
 
     switch (frame[0]) {
@@ -15,6 +18,4 @@ void dispatch_frame(const uint8_t *frame, size_t len)
         case 0x0C: op_0C(frame, len); break;
         default:   op_default(frame, len); break;
     }
-
-    putchar('\n');
 }

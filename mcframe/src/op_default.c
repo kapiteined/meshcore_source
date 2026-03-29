@@ -2,21 +2,19 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "ops.h"
-#include "util_hex.h"
-
-void op_default(const uint8_t *frame, size_t len)
-{
-    if (!frame || len == 0) {
-        printf("UNKNOWN_TOPLEVEL: len=%u (leeg)", (unsigned)len);
-        putchar('\n');
-        return;
+static const char* opcode_name(uint8_t op) {
+    switch (op) {
+        case 0x88: return "PUSH_LOG_RX_DATA";
+        case 0x83: return "PUSH_MSG_WAITING";
+        case 0x80: return "PUSH_ADVERT";
+        case 0x8A: return "PUSH_NEW_ADVERT";
+        case 0x0C: return "RESP_BATT_AND_STORAGE";
+        default:   return NULL;
     }
+}
 
-    printf("UNKNOWN_TOPLEVEL (0x%02X): len=%u (nog niet gedecodeerd)", (unsigned)frame[0], (unsigned)len);
-    putchar('\n');
-
-    printf("  hexdump: ");
-    util_hex_dump(frame, len);
-    putchar('\n');
+void op_default(const uint8_t *frame, size_t len) {
+    const char *name = opcode_name(frame[0]);
+    if (name) printf("RX frame: opcode=0x%02X (%s), len=%u\n", frame[0], name, (unsigned)len);
+    else      printf("RX frame: opcode=0x%02X, len=%u\n", frame[0], (unsigned)len);
 }
