@@ -24,12 +24,17 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     printf("  GRP_TXT outer: chan_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
            (unsigned)chan_hash, (unsigned)mac, ct_len);
 
+    /* Log ciphertext ALWAYS (also when decrypted) */
+    printf("  GRP_TXT ciphertext: ");
+    util_hex_dump(ct, ct_len);
+    printf("\n");
+
     /* Lookup secrets for this channel hash */
     const chan_secret_entry_t *e = util_chan_secret_first(chan_hash);
     if (!e) {
         printf("  GRP_TXT decrypt: chan_hash=0x%02X -> NO SECRET (plaintext onmogelijk)\n",
                (unsigned)chan_hash);
-        util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);
+        printf("  GRP_TXT: deze ciphertext kan ik niet decrypten\n");
         return;
     }
 
@@ -56,9 +61,8 @@ void ptype_grp_txt(const onair_packet_t *pkt)
                                            msg, sizeof(msg));
 
         if (rc == 0 && mac_ok) {
-            printf("  GRP_TXT decrypt: channel=\"%s\" secret=%s -> MAC OK\n",
-                   e->name ? e->name : "(noname)",
-                   e->secret_hex ? e->secret_hex : "(null)");
+            printf("  GRP_TXT decrypt: channel=\"%s\" -> MAC OK\n",
+                   e->name ? e->name : "(noname)");
             printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u msg=%s\n",
                    (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, msg);
             mac_ok_any = 1;
@@ -66,13 +70,11 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         }
 
         if (rc == 0) {
-            printf("  GRP_TXT decrypt: geprobeerd channel=\"%s\" secret=%s -> MAC BAD\n",
-                   e->name ? e->name : "(noname)",
-                   e->secret_hex ? e->secret_hex : "(null)");
+            printf("  GRP_TXT decrypt: geprobeerd channel=\"%s\" -> MAC BAD\n",
+                   e->name ? e->name : "(noname)");
         } else {
-            printf("  GRP_TXT decrypt: geprobeerd channel=\"%s\" secret=%s -> DECRYPT ERROR\n",
-                   e->name ? e->name : "(noname)",
-                   e->secret_hex ? e->secret_hex : "(null)");
+            printf("  GRP_TXT decrypt: geprobeerd channel=\"%s\" -> DECRYPT ERROR\n",
+                   e->name ? e->name : "(noname)");
         }
 
         e = util_chan_secret_next(chan_hash, e);
@@ -81,6 +83,6 @@ void ptype_grp_txt(const onair_packet_t *pkt)
     if (!mac_ok_any) {
         printf("  GRP_TXT decrypt: %d secret(s) gevonden voor chan_hash=0x%02X, maar geen MAC OK -> plaintext onderdrukt\n",
                tried, (unsigned)chan_hash);
-        util_print_undecryptable_ciphertext("GRP_TXT", ct, ct_len);
+        printf("  GRP_TXT: deze ciphertext kan ik niet decrypten\n");
     }
 }
