@@ -15,6 +15,7 @@ AM_CPPFLAGS = \
 ## Belangrijk: hier moeten óók ptype_trace.c en util_channels.c in staan,
 ## anders krijg je undefined reference errors bij linken.
 mcframe_SOURCES = \
+    op_51.c \
   main.c \
   dispatch.c \
   onair.c \

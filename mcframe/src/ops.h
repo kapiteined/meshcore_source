@@ -12,3 +12,5 @@ void op_0C(const uint8_t *frame, size_t len);
 void op_default(const uint8_t *frame, size_t len);
 
 #endif
+
+void op_51(const uint8_t *frame, size_t len);

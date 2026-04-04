@@ -2,6 +2,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <string.h>
+#include "ops.h"
 
 #include "dispatch.h"
 
@@ -41,6 +42,7 @@ void dispatch_frame(const uint8_t *frame, size_t len)
         case 0x88: op_88(frame, len); break;
         case 0x8A: op_8A(frame, len); break;
         case 0x0C: op_0C(frame, len); break;
+        case 0x51: op_51(frame, len); break;
         default:   op_default(frame, len); break;
     }
 
