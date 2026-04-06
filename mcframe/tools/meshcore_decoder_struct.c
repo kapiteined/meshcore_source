@@ -416,15 +416,15 @@ int main(int argc, char *argv[])
     }
 
 /*
-printf(">%s-%s-%s<\n", argv[0], argv[1], argv[2]);
+fprintf(stderr, ">%s-%s-%s<\n", argv[0], argv[1], argv[2]);
 */
 
     len = meshcore_decode_grp_txt(argv[1], argv[2], msg, (int)sizeof(msg), &ts, &txt_type, &attempt);
     if(len < 0) return 1;
 
-    printf("Timestamp : %u (0x%08X)\n", ts, ts);
- printf("TxtType   : %u (0x%02X)\n", (unsigned)txt_type, (unsigned)txt_type);
- printf("Attempt   : %u\n", (unsigned)attempt);
-    printf("Message   : %s\n", msg);
+    fprintf(stderr, "Timestamp : %u (0x%08X)\n", ts, ts);
+ fprintf(stderr, "TxtType   : %u (0x%02X)\n", (unsigned)txt_type, (unsigned)txt_type);
+ fprintf(stderr, "Attempt   : %u\n", (unsigned)attempt);
+    fprintf(stderr, "Message   : %s\n", msg);
     return 0;
 }

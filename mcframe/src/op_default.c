@@ -15,6 +15,6 @@ static const char* opcode_name(uint8_t op) {
 
 void op_default(const uint8_t *frame, size_t len) {
     const char *name = opcode_name(frame[0]);
-    if (name) printf("RX frame: opcode=0x%02X (%s), len=%u\n", frame[0], name, (unsigned)len);
-    else      printf("RX frame: opcode=0x%02X, len=%u\n", frame[0], (unsigned)len);
+    if (name) fprintf(stderr, "RX frame: opcode=0x%02X (%s), len=%u\n", frame[0], name, (unsigned)len);
+    else      fprintf(stderr, "RX frame: opcode=0x%02X, len=%u\n", frame[0], (unsigned)len);
 }

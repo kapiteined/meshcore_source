@@ -20,7 +20,7 @@ static void print_ts_prefix(void)
 
     char buf[64];
     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmv);
-    printf("[%s.%03ld] ", buf, (long)(tv.tv_usec / 1000));
+    fprintf(stderr, "[%s.%03ld] ", buf, (long)(tv.tv_usec / 1000));
 }
 
 void op_80(const uint8_t *frame, size_t len);
@@ -46,5 +46,5 @@ void dispatch_frame(const uint8_t *frame, size_t len)
         default:   op_default(frame, len); break;
     }
 
-    printf("\n");
+    fprintf(stderr, "\n");
 }

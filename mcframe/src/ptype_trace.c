@@ -14,7 +14,7 @@
 
 static void print_hash_no_prefix(const uint8_t *p, unsigned n)
 {
-    for (unsigned i = 0; i < n; i++) printf("%02X", p[i]);
+    for (unsigned i = 0; i < n; i++) fprintf(stderr, "%02X", p[i]);
 }
 
 void ptype_trace(const onair_packet_t *pkt)
@@ -23,7 +23,7 @@ void ptype_trace(const onair_packet_t *pkt)
 
     /* Need at least: trace_tag(4) + auth_code(4) + flags(1) */
     if (pkt->payload_len < 9) {
-        printf("  TRACE: payload too short (%u)\n", (unsigned)pkt->payload_len);
+        fprintf(stderr, "  TRACE: payload too short (%u)\n", (unsigned)pkt->payload_len);
         return;
     }
 
@@ -40,16 +40,16 @@ void ptype_trace(const onair_packet_t *pkt)
     unsigned hoplist_len = (unsigned)(pkt->payload_len - 9);
     unsigned planned_hops = hop_hash_sz ? (hoplist_len / hop_hash_sz) : 0;
 
-    printf("  TRACE: tag=0x%08X auth=0x%08X flags=0x%02X hop_hash_sz=%u planned_hops=%u snr_samples=%u\n",
+    fprintf(stderr, "  TRACE: tag=0x%08X auth=0x%08X flags=0x%02X hop_hash_sz=%u planned_hops=%u snr_samples=%u\n",
            trace_tag, auth_code, (unsigned)flags, hop_hash_sz, planned_hops, (unsigned)pkt->hop_count);
 
     if (planned_hops) {
-        printf("  planned hops (%u): ", planned_hops);
+        fprintf(stderr, "  planned hops (%u): ", planned_hops);
         for (unsigned i = 0; i < planned_hops; i++) {
-            if (i) printf("->");
+            if (i) fprintf(stderr, "->");
             print_hash_no_prefix(hoplist + i * hop_hash_sz, hop_hash_sz);
         }
-        printf("\n");
+        fprintf(stderr, "\n");
     }
 
     /* Side-by-side: hop[i] with snr[i] if present */
@@ -57,21 +57,21 @@ void ptype_trace(const onair_packet_t *pkt)
     if (pkt->hop_count > rows) rows = pkt->hop_count;
 
     for (unsigned i = 0; i < rows; i++) {
-        printf("  hop[%u]=", i);
+        fprintf(stderr, "  hop[%u]=", i);
         if (i < planned_hops) {
             print_hash_no_prefix(hoplist + i * hop_hash_sz, hop_hash_sz);
         } else {
-            printf("--");
+            fprintf(stderr, "--");
         }
 
-        printf("  snr=");
+        fprintf(stderr, "  snr=");
         if (i < pkt->hop_count && pkt->path && pkt->path_bytes) {
             int8_t q = (int8_t)pkt->path[i];
             double snr_db = ((double)q) / 4.0;
-            printf("%.2f dB", snr_db);
+            fprintf(stderr, "%.2f dB", snr_db);
         } else {
-            printf("--");
+            fprintf(stderr, "--");
         }
-        printf("\n");
+        fprintf(stderr, "\n");
     }
 }

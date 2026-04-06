@@ -7,14 +7,14 @@ static uint16_t u16le16(const uint8_t *p) { return (uint16_t)(p[0] | ((uint16_t)
 
 void ptype_req(const onair_packet_t *pkt) {
     if (pkt->payload_len < 4) {
-        printf("  REQ outer: too_short payload_len=%u (need >=4)\n", (unsigned)pkt->payload_len);
+        fprintf(stderr, "  REQ outer: too_short payload_len=%u (need >=4)\n", (unsigned)pkt->payload_len);
         return;
     }
     const uint8_t *p = pkt->payload;
     uint16_t mac = u16le16(&p[2]);
     unsigned ct_len = (unsigned)pkt->payload_len - 4;
     const uint8_t *ct = &p[4];
-    printf("  REQ outer: dst_hash=0x%02X src_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
+    fprintf(stderr, "  REQ outer: dst_hash=0x%02X src_hash=0x%02X mac=0x%04X ciphertext_len=%u\n",
            (unsigned)p[0], (unsigned)p[1], (unsigned)mac, ct_len);
     util_print_undecryptable_ciphertext("REQ", ct, ct_len);
 }
