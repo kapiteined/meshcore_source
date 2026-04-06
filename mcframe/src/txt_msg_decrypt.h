@@ -1,5 +1,7 @@
+
 #ifndef TXT_MSG_DECRYPT_H
 #define TXT_MSG_DECRYPT_H
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -11,6 +13,9 @@ typedef struct {
   uint8_t attempt;
   int mac_ok;
   char msg[256];
+
+  uint8_t from_pubkey[32];
+  int from_pubkey_valid;
 } txt_msg_result_t;
 
 int txt_msg_decrypt_and_parse(uint8_t dst_hash, uint8_t src_hash,
