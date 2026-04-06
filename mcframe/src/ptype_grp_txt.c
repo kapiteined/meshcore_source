@@ -60,13 +60,14 @@ void ptype_grp_txt(const onair_packet_t *pkt)
                                            &mac_ok,
                                            msg, sizeof(msg));
 
-        if (rc == 0 && mac_ok) {
-            printf("  GRP_TXT decrypt: channel=\"%s\" -> MAC OK\n",
-                   e->name ? e->name : "(noname)");
-            printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u msg=%s\n",
-                   (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, msg);
-            mac_ok_any = 1;
-            break;
+        if (rc == 0 && mac_ok)
+         {
+         printf("  GRP_TXT decrypt: channel=\"%s\" -> MAC OK\n", e->name ? e->name : "(noname)");
+         printf("  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+         printf("  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u msg=%s\n", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, msg);
+         printf("  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+         mac_ok_any = 1;
+         break;
         }
 
         if (rc == 0) {
