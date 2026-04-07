@@ -13,8 +13,10 @@ AC_MSG_RESULT([$have_c99])
 AS_IF([test "x$have_c99" = "xyes"],[CFLAGS="$CFLAGS -std=c99"])
 CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
 AC_CONFIG_FILES([
-  Makefile
-  mcframe/Makefile
-  mcframe/src/Makefile
+ Makefile
+ mcframe/Makefile
+ mcframe/src/Makefile
+ send_dm_tool/Makefile
+ send_dm_tool/src/Makefile
 ])
 AC_OUTPUT
