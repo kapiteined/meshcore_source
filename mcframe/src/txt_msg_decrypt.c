@@ -6,12 +6,15 @@
 #include "crypto/ed25519/ed_25519.h"
 
 static uint32_t u32le(const uint8_t *p) {
-  return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+  return (uint32_t)p[0]
+       | ((uint32_t)p[1] << 8)
+       | ((uint32_t)p[2] << 16)
+       | ((uint32_t)p[3] << 24);
 }
 
 static void ensure_keys_loaded(void) {
   if (!util_privkeys_is_loaded()) util_privkeys_load("./privkeys.txt");
-  if (!util_pubkeys_is_loaded())  util_pubkeys_load("./pubkeys.txt");
+  if (!util_pubkeys_is_loaded()) util_pubkeys_load("./pubkeys.txt");
 }
 
 int txt_msg_decrypt_and_parse(uint8_t dst_hash, uint8_t src_hash,
@@ -27,6 +30,7 @@ int txt_msg_decrypt_and_parse(uint8_t dst_hash, uint8_t src_hash,
 
   if (!ciphertext || !out || ct_len == 0 || (ct_len % 16) != 0) return -1;
   memset(out, 0, sizeof(*out));
+
   ensure_keys_loaded();
 
   blocks = (int)(ct_len / 16);
@@ -67,6 +71,9 @@ int txt_msg_decrypt_and_parse(uint8_t dst_hash, uint8_t src_hash,
 
       out->from_label = peer->label;
       out->to_label = self->label;
+      memcpy(out->from_prefix6, peer->prefix6, 6);
+      out->from_ack = peer->ack;
+
       return 0;
     }
   }

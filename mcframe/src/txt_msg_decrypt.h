@@ -1,5 +1,6 @@
 #ifndef TXT_MSG_DECRYPT_H
 #define TXT_MSG_DECRYPT_H
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -10,6 +11,8 @@ typedef struct {
   uint8_t txt_type;
   uint8_t attempt;
   int mac_ok;
+  uint8_t from_prefix6[6];
+  uint8_t from_ack;   /* ack policy for sender (from pubkeys.txt), default 0 */
   char msg[256];
 } txt_msg_result_t;
 
