@@ -116,7 +116,7 @@ void ptype_grp_txt(const onair_packet_t *pkt)
                signer_found = 1;
                if (!pk->ack) {
                  fprintf(stderr, "  GRP_TXT signer %s found but ack=0 -> geen ACK_DM\n",
-                         pk->label ? pk->label : "?");
+                         pk->label);
                  break;
                }
                if (is_ack_message_text(msg)) {
@@ -128,7 +128,7 @@ void ptype_grp_txt(const onair_packet_t *pkt)
                int s_rc = mc_companion_send_dm_prefix6_stdout(pk->prefix6, ack_msg);
                if (s_rc == 0) {
                  fprintf(stderr, "  ACK_DM queued to %s (%02x%02x%02x%02x%02x%02x): %s\n",
-                         pk->label ? pk->label : "?",
+                         pk->label,
                          pk->prefix6[0], pk->prefix6[1], pk->prefix6[2],
                          pk->prefix6[3], pk->prefix6[4], pk->prefix6[5],
                          ack_msg);

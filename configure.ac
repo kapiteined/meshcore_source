@@ -11,7 +11,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[have_c99=yes],[have_c99=no])
 CFLAGS="$save_CFLAGS"
 AC_MSG_RESULT([$have_c99])
 AS_IF([test "x$have_c99" = "xyes"],[CFLAGS="$CFLAGS -std=c99"])
-CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic"
+CFLAGS="$CFLAGS -Wall -Wextra -Wpedantic -Werror"
 AC_CONFIG_FILES([
  Makefile
  mcframe/Makefile
