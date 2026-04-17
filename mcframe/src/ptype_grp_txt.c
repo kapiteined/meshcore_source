@@ -23,7 +23,12 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         return;
     }
 
-    if (!util_pubkeys_is_loaded()) util_pubkeys_load("./pubkeys.txt");
+    if (!util_pubkeys_is_loaded()) {
+        int rc = util_pubkeys_load("./pubkeys.txt");
+        if (rc != 0) {
+            fprintf(stderr, "  GRP_TXT warning: failed to load ./pubkeys.txt (rc=%d)\n", rc);
+        }
+    }
 
     const uint8_t *p = pkt->payload;
     uint8_t chan_hash = p[0];
@@ -98,27 +103,46 @@ void ptype_grp_txt(const onair_packet_t *pkt)
          // - check if signer has ack=1 in pubkeys.txt
          // - never ack ack-messages to avoid loops
          if (has_signer) {
+           char signer_hex[9];
+           snprintf(signer_hex, sizeof(signer_hex), "%02X%02X%02X%02X",
+                    signer_prefix[0], signer_prefix[1], signer_prefix[2], signer_prefix[3]);
+           fprintf(stderr, "  GRP_TXT signer prefix: %s\n", signer_hex);
+
            size_t n = util_pubkeys_count();
+           int signer_found = 0;
            for (size_t i = 0; i < n; i++) {
              const util_pubkey_t *pk = util_pubkeys_get(i);
              if (memcmp(pk->prefix6, signer_prefix, 4) == 0) {
-               if (pk->ack && !is_ack_message_text(msg)) {
-                 char ack_msg[128];
-                 snprintf(ack_msg, sizeof(ack_msg), "@ack ts=%u", (unsigned)ts);
-                 int s_rc = mc_companion_send_dm_prefix6_stdout(pk->prefix6, ack_msg);
-                 if (s_rc == 0) {
-                   fprintf(stderr, " ACK_DM queued to %s (%02x%02x%02x%02x%02x%02x): %s\n",
-                           pk->label ? pk->label : "?",
-                           pk->prefix6[0], pk->prefix6[1], pk->prefix6[2],
-                           pk->prefix6[3], pk->prefix6[4], pk->prefix6[5],
-                           ack_msg);
-                 } else {
-                   fprintf(stderr, " ACK_DM failed rc=%d\n", s_rc);
-                 }
+               signer_found = 1;
+               if (!pk->ack) {
+                 fprintf(stderr, "  GRP_TXT signer %s found but ack=0 -> geen ACK_DM\n",
+                         pk->label ? pk->label : "?");
+                 break;
+               }
+               if (is_ack_message_text(msg)) {
+                 fprintf(stderr, "  GRP_TXT received ack message -> geen ACK_DM om lus te voorkomen\n");
+                 break;
+               }
+               char ack_msg[128];
+               snprintf(ack_msg, sizeof(ack_msg), "@ack ts=%u", (unsigned)ts);
+               int s_rc = mc_companion_send_dm_prefix6_stdout(pk->prefix6, ack_msg);
+               if (s_rc == 0) {
+                 fprintf(stderr, "  ACK_DM queued to %s (%02x%02x%02x%02x%02x%02x): %s\n",
+                         pk->label ? pk->label : "?",
+                         pk->prefix6[0], pk->prefix6[1], pk->prefix6[2],
+                         pk->prefix6[3], pk->prefix6[4], pk->prefix6[5],
+                         ack_msg);
+               } else {
+                 fprintf(stderr, "  ACK_DM failed rc=%d\n", s_rc);
                }
                break;
              }
            }
+           if (!signer_found) {
+             fprintf(stderr, "  GRP_TXT signer prefix %s niet gevonden in pubkeys.txt -> geen ACK_DM\n", signer_hex);
+           }
+         } else {
+           fprintf(stderr, "  GRP_TXT: geen signer prefix aanwezig -> geen ACK_DM mogelijk\n");
          }
 
          mac_ok_any = 1;
