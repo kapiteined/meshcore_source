@@ -1,1 +1,1 @@
-SUBDIRS = mcframe send_dm_tool
+SUBDIRS = mcframe send_dm_tool companion_tools

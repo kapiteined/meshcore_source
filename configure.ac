@@ -18,5 +18,6 @@ AC_CONFIG_FILES([
  mcframe/src/Makefile
  send_dm_tool/Makefile
  send_dm_tool/src/Makefile
+ companion_tools/Makefile
 ])
 AC_OUTPUT

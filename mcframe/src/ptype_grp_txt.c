@@ -63,9 +63,27 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         if (rc == 0 && mac_ok)
          {
          fprintf(stderr, "  GRP_TXT decrypt: channel=\"%s\" -> MAC OK\n", e->name ? e->name : "(noname)");
-         fprintf(stderr, "  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+
+         if(chan_hash == 0x11)
+          {
+          fprintf(stderr, "  =======================================================================================\n" );
+          }
+         else
+          {
+          fprintf(stderr, "  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+          }
+
          fprintf(stderr, "  GRP_TXT plaintext: ts=%u txt_type=%u attempt=%u msg=%s\n", (unsigned)ts, (unsigned)txt_type, (unsigned)attempt, msg);
-         fprintf(stderr, "  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+
+         if(chan_hash == 0x11)
+          {
+          fprintf(stderr, "  =======================================================================================\n" );
+          }
+         else
+          {
+          fprintf(stderr, "  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
+          }
+
          mac_ok_any = 1;
          break;
         }
