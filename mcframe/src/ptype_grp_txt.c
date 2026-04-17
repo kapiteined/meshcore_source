@@ -1,12 +1,20 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ptype_dispatch.h"
 #include "util_hex.h"
 #include "util_channels.h"
 #include "grp_txt_decrypt.h"
+#include "util_pubkeys.h"
+#include "mc_companion_dm.h"
 
 static uint16_t u16le16(const uint8_t *p) { return (uint16_t)(p[0] | ((uint16_t)p[1] << 8)); }
+
+static int is_ack_message_text(const char *s) {
+  if (!s) return 0;
+  return (strncmp(s, "@ack ", 5) == 0) || (strncmp(s, "ACK ", 4) == 0) || (strncmp(s, "ACK:", 4) == 0);
+}
 
 void ptype_grp_txt(const onair_packet_t *pkt)
 {
@@ -14,6 +22,8 @@ void ptype_grp_txt(const onair_packet_t *pkt)
         fprintf(stderr, "  GRP_TXT outer: too_short payload_len=%u (need >=3)\n", (unsigned)pkt->payload_len);
         return;
     }
+
+    if (!util_pubkeys_is_loaded()) util_pubkeys_load("./pubkeys.txt");
 
     const uint8_t *p = pkt->payload;
     uint8_t chan_hash = p[0];
@@ -83,6 +93,33 @@ void ptype_grp_txt(const onair_packet_t *pkt)
           {
           fprintf(stderr, "  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" );
           }
+
+         // Receipt ACK-DM policy for group texts:
+         // - check if signer has ack=1 in pubkeys.txt
+         // - never ack ack-messages to avoid loops
+         if (has_signer) {
+           size_t n = util_pubkeys_count();
+           for (size_t i = 0; i < n; i++) {
+             const util_pubkey_t *pk = util_pubkeys_get(i);
+             if (memcmp(pk->prefix6, signer_prefix, 4) == 0) {
+               if (pk->ack && !is_ack_message_text(msg)) {
+                 char ack_msg[128];
+                 snprintf(ack_msg, sizeof(ack_msg), "@ack ts=%u", (unsigned)ts);
+                 int s_rc = mc_companion_send_dm_prefix6_stdout(pk->prefix6, ack_msg);
+                 if (s_rc == 0) {
+                   fprintf(stderr, " ACK_DM queued to %s (%02x%02x%02x%02x%02x%02x): %s\n",
+                           pk->label ? pk->label : "?",
+                           pk->prefix6[0], pk->prefix6[1], pk->prefix6[2],
+                           pk->prefix6[3], pk->prefix6[4], pk->prefix6[5],
+                           ack_msg);
+                 } else {
+                   fprintf(stderr, " ACK_DM failed rc=%d\n", s_rc);
+                 }
+               }
+               break;
+             }
+           }
+         }
 
          mac_ok_any = 1;
          break;
